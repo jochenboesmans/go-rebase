@@ -10,10 +10,10 @@ import (
 Market pair containing data from one or many exchanges.
 */
 type Pair struct {
-	BaseSymbol string
-	BaseId string
-	QuoteSymbol string
-	QuoteId string
+	BaseSymbol                     string
+	BaseId                         string
+	QuoteSymbol                    string
+	QuoteId                        string
 	ExchangeMarketDataByExchangeId map[ExchangeId]ExchangeMarketData
 }
 
@@ -27,7 +27,7 @@ func (p *Pair) Id() string {
 	return hex.EncodeToString(result)
 }
 
-func (p *Pair) combinedBaseVolume() float32 {
+func (p *Pair) CombinedBaseVolume() float32 {
 	var sum float32 = 0
 	for _, emd := range p.ExchangeMarketDataByExchangeId {
 		sum += emd.BaseVolume
@@ -35,7 +35,7 @@ func (p *Pair) combinedBaseVolume() float32 {
 	return sum
 }
 
-func (p *Pair) baseVolumeWeightedCurrentBidSum() float32 {
+func (p *Pair) BaseVolumeWeightedCurrentBidSum() float32 {
 	var sum float32 = 0
 	for _, emd := range p.ExchangeMarketDataByExchangeId {
 		sum += emd.BaseVolume * emd.CurrentBid
@@ -43,7 +43,7 @@ func (p *Pair) baseVolumeWeightedCurrentBidSum() float32 {
 	return sum
 }
 
-func (p *Pair) baseVolumeWeightedCurrentAskSum() float32 {
+func (p *Pair) BaseVolumeWeightedCurrentAskSum() float32 {
 	var sum float32 = 0
 	for _, emd := range p.ExchangeMarketDataByExchangeId {
 		sum += emd.BaseVolume * emd.CurrentAsk
@@ -51,14 +51,12 @@ func (p *Pair) baseVolumeWeightedCurrentAskSum() float32 {
 	return sum
 }
 
-func (p *Pair) baseVolumeWeightedSpreadAverage() float32 {
-	spreadAverage := (p.baseVolumeWeightedCurrentBidSum() + p.baseVolumeWeightedCurrentAskSum()) / 2
-	weightedAverage := spreadAverage / p.combinedBaseVolume()
-	return weightedAverage
+func (p *Pair) BaseVolumeWeightedSpreadAverage() (float32, error) {
+	spreadAverage := (p.BaseVolumeWeightedCurrentBidSum() + p.BaseVolumeWeightedCurrentAskSum()) / 2
+	if p.CombinedBaseVolume() == float32(0) {
+		return 0, fmt.Errorf(`combined base volume is 0 for pair: %+v\n`, p)
+	} else {
+		weightedAverage := spreadAverage / p.CombinedBaseVolume()
+		return weightedAverage, nil
+	}
 }
-
-
-
-
-
-

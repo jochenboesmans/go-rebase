@@ -26,7 +26,7 @@ func TestCombinedBaseVolume(t *testing.T) {
 		expected := mockPair.ExchangeMarketDataByExchangeId[KYBER].BaseVolume +
 			mockPair.ExchangeMarketDataByExchangeId[UNISWAP].BaseVolume
 
-		result := mockPair.combinedBaseVolume()
+		result := mockPair.CombinedBaseVolume()
 
 		So(result, ShouldEqual, expected)
 	})
@@ -34,12 +34,12 @@ func TestCombinedBaseVolume(t *testing.T) {
 
 func TestBaseVolumeWeightedCurrentBidSum(t *testing.T) {
 	Convey("works as expected for basic mock pair", t, func() {
-		expected := mockPair.ExchangeMarketDataByExchangeId[KYBER].CurrentBid *
+		expected := mockPair.ExchangeMarketDataByExchangeId[KYBER].CurrentBid*
 			mockPair.ExchangeMarketDataByExchangeId[KYBER].BaseVolume +
-			mockPair.ExchangeMarketDataByExchangeId[UNISWAP].CurrentBid *
-			mockPair.ExchangeMarketDataByExchangeId[UNISWAP].BaseVolume
+			mockPair.ExchangeMarketDataByExchangeId[UNISWAP].CurrentBid*
+				mockPair.ExchangeMarketDataByExchangeId[UNISWAP].BaseVolume
 
-		result := mockPair.baseVolumeWeightedCurrentBidSum()
+		result := mockPair.BaseVolumeWeightedCurrentBidSum()
 
 		So(result, ShouldEqual, expected)
 	})
@@ -47,12 +47,12 @@ func TestBaseVolumeWeightedCurrentBidSum(t *testing.T) {
 
 func TestBaseVolumeWeightedCurrentAskSum(t *testing.T) {
 	Convey("works as expected for basic mock pair", t, func() {
-		expected := mockPair.ExchangeMarketDataByExchangeId[KYBER].CurrentAsk *
+		expected := mockPair.ExchangeMarketDataByExchangeId[KYBER].CurrentAsk*
 			mockPair.ExchangeMarketDataByExchangeId[KYBER].BaseVolume +
-			mockPair.ExchangeMarketDataByExchangeId[UNISWAP].CurrentAsk *
-			mockPair.ExchangeMarketDataByExchangeId[UNISWAP].BaseVolume
+			mockPair.ExchangeMarketDataByExchangeId[UNISWAP].CurrentAsk*
+				mockPair.ExchangeMarketDataByExchangeId[UNISWAP].BaseVolume
 
-		result := mockPair.baseVolumeWeightedCurrentAskSum()
+		result := mockPair.BaseVolumeWeightedCurrentAskSum()
 
 		So(result, ShouldEqual, expected)
 	})
@@ -60,13 +60,14 @@ func TestBaseVolumeWeightedCurrentAskSum(t *testing.T) {
 
 func TestBaseVolumeWeightedSpreadAverage(t *testing.T) {
 	Convey("works as expected for basic mock pair", t, func() {
-		expected := ((mockPair.baseVolumeWeightedCurrentBidSum() +
-			mockPair.baseVolumeWeightedCurrentAskSum()) /
+		expected := ((mockPair.BaseVolumeWeightedCurrentBidSum() +
+			mockPair.BaseVolumeWeightedCurrentAskSum()) /
 			2) /
-			mockPair.combinedBaseVolume()
+			mockPair.CombinedBaseVolume()
 
-		result := mockPair.baseVolumeWeightedSpreadAverage()
+		result, err := mockPair.BaseVolumeWeightedSpreadAverage()
 
+		So(err, ShouldBeNil)
 		So(result, ShouldEqual, expected)
 	})
 }
