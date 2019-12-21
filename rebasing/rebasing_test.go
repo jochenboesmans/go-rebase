@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestRebasedRate(t *testing.T) {
+func TestShallowlyRebaseRate(t *testing.T) {
 	Convey("rebase ids have matching pair in market", t, func() {
 		rate := float32(1.1)
 		rebaseId := "0xfoo"
@@ -54,13 +54,13 @@ func TestRebasedRate(t *testing.T) {
 		// only test in case BaseVolumeWeightedSpreadAverage returns valid response
 		if err1 == nil {
 			expected := rate * rebasePairBaseVolumeWeightedSpreadAverage
-			actual, err := RebasedRate(rate, rebaseId, baseId, market)
+			actual, err := shallowlyRebaseRate(rate, rebaseId, baseId, &market)
 
 			So(err, ShouldBeNil)
 			So(actual, ShouldResemble, expected)
 		} else {
 			expected := 0
-			actual, err := RebasedRate(rate, rebaseId, baseId, market)
+			actual, err := shallowlyRebaseRate(rate, rebaseId, baseId, &market)
 
 			So(err, ShouldNotBeNil)
 			So(actual, ShouldResemble, expected)
@@ -86,7 +86,7 @@ func TestRebasedRate(t *testing.T) {
 			},
 		}
 		expected := rate
-		actual, err := RebasedRate(rate, rebaseId, baseId, market)
+		actual, err := shallowlyRebaseRate(rate, rebaseId, baseId, &market)
 
 		So(err, ShouldBeNil)
 		So(actual, ShouldResemble, expected)
