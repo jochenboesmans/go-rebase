@@ -2,27 +2,32 @@ package rebasing
 
 import (
 	"fmt"
+	"sync"
+
 	m "github.com/jochenboesmans/go-rebase/model/market"
 )
 
 type rebaseDirection uint8
+
 const (
 	BASE = iota + 1
 	QUOTE
 )
 
 type rebasePathsType struct {
-	Base [][]string
+	Base  [][]string
 	Quote [][]string
 }
 
 func RebaseMarket(rebaseId string, pathDepth uint8, market *m.Market) {
+	var waitGroup sync.WaitGroup
 	for pairId := range market.PairsById {
-		go rebasePair(pairId, rebaseId, pathDepth, market)
+		go rebasePair(pairId, rebaseId, pathDepth, market, &waitGroup)
 	}
+	waitGroup.Wait()
 }
 
-func rebasePair(pairId string, rebaseId string, pathDepth uint8, market *m.Market) {
+func rebasePair(pairId string, rebaseId string, pathDepth uint8, market *m.Market, waitGroup *sync.WaitGroup) {
 	initialPath := []string{pairId}
 	rebasePaths := rebasePathsType{
 		Base:  rebasePaths(BASE, initialPath, rebaseId, pathDepth, market),
@@ -32,14 +37,23 @@ func rebasePair(pairId string, rebaseId string, pathDepth uint8, market *m.Marke
 	pair := market.PairsById[pairId]
 
 	for exchangeId, emd := range pair.ExchangeMarketDataByExchangeId {
-		emd.CurrentAsk = deeplyRebaseRate(emd.CurrentAsk, rebasePaths)
-		emd.CurrentBid = deeplyRebaseRate(emd.CurrentBid, rebasePaths)
-		emd.LastPrice = deeplyRebaseRate(emd.LastPrice, rebasePaths)
-		emd.BaseVolume = deeplyRebaseRate(emd.BaseVolume, rebasePaths)
+		if rebasedCurrentAsk, err := deeplyRebaseRate(emd.CurrentAsk, rebaseId, rebasePaths, market); err == nil {
+			emd.CurrentAsk = rebasedCurrentAsk
+		}
+		if rebasedCurrentBid, err := deeplyRebaseRate(emd.CurrentBid, rebaseId, rebasePaths, market); err == nil {
+			emd.CurrentBid = rebasedCurrentBid
+		}
+		if rebasedLastPrice, err := deeplyRebaseRate(emd.LastPrice, rebaseId, rebasePaths, market); err == nil {
+			emd.LastPrice = rebasedLastPrice
+		}
+		if rebasedBaseVolume, err := deeplyRebaseRate(emd.BaseVolume, rebaseId, rebasePaths, market); err == nil {
+			emd.BaseVolume = rebasedBaseVolume
+		}
 		pair.ExchangeMarketDataByExchangeId[exchangeId] = emd
 	}
 
 	market.PairsById[pairId] = pair
+	waitGroup.Done()
 }
 
 func rebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId string, pathDepth uint8, market *m.Market) [][]string {
@@ -57,27 +71,77 @@ func rebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId s
 }
 
 func doRebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId string, pathDepth uint8, market *m.Market) [][]string {
-	nextNeighbors := n.Neighbors(direction, pathAccumulator[0])
+	nextNeighborIds := NeighborIds(direction, pathAccumulator[0], market)
 
 	var result [][]string
-	for _, nextNeighbor := range nextNeighbors {
-		nextPath := append([]string{nextNeighbor})
+	for _, nextNeighborId := range nextNeighborIds {
+		nextPath := append([]string{nextNeighborId})
 		result = append(result, rebasePaths(direction, nextPath, rebaseId, pathDepth, market)...)
 	}
 	return result
 }
 
 func deeplyRebaseRate(rate float32, rebaseId string, rebasePaths rebasePathsType, market *m.Market) (float32, error) {
-	baseCombinedVolume := 0
-	baseVolumeWeightedSum := 0
+	combinedVolume := float32(0)
+	volumeWeightedSum := float32(0)
 	for _, baseRebasePath := range rebasePaths.Base {
-
+		rebasedRateAcc := rate
+		weightedSumAcc := float32(0)
+		for i := len(baseRebasePath) - 2; i >= 0; i-- {
+			pair := market.PairsById[baseRebasePath[i]]
+			baseId := pair.BaseId
+			quoteId := pair.QuoteId
+			if rebasedRate, err := shallowlyRebaseRate(rebasedRateAcc, baseId, quoteId, market); err == nil {
+				rebasedRateAcc = rebasedRate
+			}
+			combinedVolume := pair.CombinedBaseVolume()
+			if rebasedCombinedVolume, err := shallowlyRebaseRate(combinedVolume, rebaseId, baseId, market); err == nil {
+				weightedSumAcc += rebasedCombinedVolume
+			}
+		}
+		weight := weightedSumAcc / float32(len(baseRebasePath))
+		combinedVolume += weight
+		volumeWeightedSum += weight * rebasedRateAcc
 	}
 
-	quoteCombinedVolume := 0
-	quoteVolumeWeightedSum := 0
 	for _, quoteRebasePath := range rebasePaths.Quote {
+		rebasedRateAcc := rate
+		weightedSumAcc := float32(0)
+		for i := len(quoteRebasePath) - 1; i >= 0; i-- {
+			pair := market.PairsById[quoteRebasePath[i]]
+			baseId := pair.BaseId
+			quoteId := pair.QuoteId
+			if i == 0 {
+				combinedVolume := market.PairsById[quoteRebasePath[i]].CombinedBaseVolume()
+				if rebasedCombinedVolume, err := shallowlyRebaseRate(combinedVolume, rebaseId, baseId, market); err == nil {
+					weightedSumAcc += rebasedCombinedVolume
+				}
+			} else if i == len(quoteRebasePath)-1 {
+				if rebasedRate, err := shallowlyRebaseRate(rebasedRateAcc, quoteId, baseId, market); err == nil {
+					rebasedRateAcc = rebasedRate
+				}
+			} else {
+				pair := market.PairsById[quoteRebasePath[i]]
+				baseId := pair.BaseId
+				quoteId := pair.QuoteId
+				if rebasedRate, err := shallowlyRebaseRate(rebasedRateAcc, quoteId, baseId, market); err == nil {
+					rebasedRateAcc = rebasedRate
+				}
+				combinedVolume := pair.CombinedBaseVolume()
+				if rebasedCombinedVolume, err := shallowlyRebaseRate(combinedVolume, rebaseId, baseId, market); err == nil {
+					weightedSumAcc += rebasedCombinedVolume
+				}
+			}
+		}
+		weight := weightedSumAcc / float32(len(quoteRebasePath))
+		combinedVolume += weight
+		volumeWeightedSum += weight * rebasedRateAcc
+	}
 
+	if combinedVolume == 0 {
+		return 0, fmt.Errorf("division by 0")
+	} else {
+		return volumeWeightedSum / combinedVolume, nil
 	}
 }
 
