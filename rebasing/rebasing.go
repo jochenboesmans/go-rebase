@@ -112,7 +112,7 @@ func deeplyRebaseRate(rate float32, rebaseId string, rebasePaths rebasePathsType
 			baseId := pair.BaseId
 			quoteId := pair.QuoteId
 			if i == 0 {
-				combinedVolume := market.PairsById[quoteRebasePath[i]].CombinedBaseVolume()
+				combinedVolume := pair.CombinedBaseVolume()
 				if rebasedCombinedVolume, err := shallowlyRebaseRate(combinedVolume, rebaseId, baseId, market); err == nil {
 					weightedSumAcc += rebasedCombinedVolume
 				}
