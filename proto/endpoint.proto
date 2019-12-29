@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+message ExchangeMarketDataType {
+    string ExchangeId = 1;
+    float LastPrice = 2;
+    float CurrentBid = 3;
+    float CurrentAsk = 4;
+    float BaseVolume = 5;
+}
+
+message PairType {
+    string BaseSymbol = 1;
+    string BaseId = 2;
+    string QuoteSymbol = 3;
+    string QuoteId = 4;
+    repeated ExchangeMarketDataType ExchangeMarketData = 5;
+}
+
+message MarketType {
+    repeated PairType Pairs = 1;
+}
