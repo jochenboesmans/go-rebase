@@ -10,11 +10,21 @@ import (
 Market pair containing data from one or many exchanges.
 */
 type Pair struct {
-	BaseSymbol                     string
-	BaseId                         string
-	QuoteSymbol                    string
-	QuoteId                        string
-	ExchangeMarketDataByExchangeId map[ExchangeId]ExchangeMarketData
+	BaseSymbol                     string                        `json:"baseSymbol"`
+	BaseId                         string                        `json:"baseId"`
+	QuoteSymbol                    string                        `json:"quoteSymbol"`
+	QuoteId                        string                        `json:"quoteId"`
+	ExchangeMarketDataByExchangeId map[string]ExchangeMarketData `json:"exchangeMarketDataByExchangeId"`
+}
+
+/**
+Exchange-specific market data.
+*/
+type ExchangeMarketData struct {
+	LastPrice  float32 `json:"lastPrice"`
+	CurrentBid float32 `json:"currentBid"`
+	CurrentAsk float32 `json:"currentAsk"`
+	BaseVolume float32 `json:"baseVolume"`
 }
 
 func (p *Pair) Id() string {

@@ -15,13 +15,13 @@ func TestShallowlyRebaseRate(t *testing.T) {
 		originalPair := m.Pair{
 			BaseId:  baseId,
 			QuoteId: quoteId,
-			ExchangeMarketDataByExchangeId: map[m.ExchangeId]m.ExchangeMarketData{
-				m.KYBER: {
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"KYBER": {
 					BaseVolume: 1.5,
 					CurrentBid: 100.7,
 					CurrentAsk: 103.5,
 				},
-				m.UNISWAP: {
+				"UNISWAP": {
 					BaseVolume: 3,
 					CurrentBid: 150.1,
 					CurrentAsk: 155.2,
@@ -31,13 +31,13 @@ func TestShallowlyRebaseRate(t *testing.T) {
 		rebasePair := m.Pair{
 			BaseId:  rebaseId,
 			QuoteId: baseId,
-			ExchangeMarketDataByExchangeId: map[m.ExchangeId]m.ExchangeMarketData{
-				m.KYBER: {
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"KYBER": {
 					BaseVolume: 1.5,
 					CurrentBid: 100.7,
 					CurrentAsk: 103.5,
 				},
-				m.UNISWAP: {
+				"UNISWAP": {
 					BaseVolume: 3,
 					CurrentBid: 150.1,
 					CurrentAsk: 155.2,

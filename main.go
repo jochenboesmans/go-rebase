@@ -8,14 +8,14 @@ import (
 )
 
 type inputType struct {
-	rebaseId  string
-	pathDepth uint8
-	market    m.Market
+	RebaseId  string   `json:"rebaseId"`
+	PathDepth uint8    `json:"pathDepth"`
+	Market    m.Market `json:"market"`
 }
 
 func rebase(i inputType) (m.Market, error) {
-	rebasing.RebaseMarket(i.rebaseId, i.pathDepth, &i.market)
-	return i.market, nil
+	rebasing.RebaseMarket(i.RebaseId, i.PathDepth, &i.Market)
+	return i.Market, nil
 }
 
 func main() {
