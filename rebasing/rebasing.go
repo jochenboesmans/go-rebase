@@ -71,7 +71,12 @@ func rebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId s
 }
 
 func doRebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId string, pathDepth uint8, market *m.Market) [][]string {
-	nextNeighborIds := NeighborIds(direction, pathAccumulator[0], market)
+	var nextNeighborIds []string
+	if direction == BASE {
+		nextNeighborIds = market.PairsById[pathAccumulator[0]].BaseNeighborIds(market)
+	} else if direction == QUOTE {
+		nextNeighborIds = market.PairsById[pathAccumulator[0]].QuoteNeighborIds(market)
+	}
 
 	var result [][]string
 	for _, nextNeighborId := range nextNeighborIds {

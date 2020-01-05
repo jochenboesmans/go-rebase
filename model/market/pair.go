@@ -27,6 +27,26 @@ func (p *Pair) Id() string {
 	return hex.EncodeToString(result)
 }
 
+func (p Pair) BaseNeighborIds(market *Market) []string {
+	var neighborIdsAcc []string
+	for pairId, pair := range market.PairsById {
+		if p.BaseId == pair.QuoteId {
+			neighborIdsAcc = append(neighborIdsAcc, pairId)
+		}
+	}
+	return neighborIdsAcc
+}
+
+func (p Pair) QuoteNeighborIds(market *Market) []string {
+	var neighborIdsAcc []string
+	for pairId, pair := range market.PairsById {
+		if p.QuoteId == pair.BaseId {
+			neighborIdsAcc = append(neighborIdsAcc, pairId)
+		}
+	}
+	return neighborIdsAcc
+}
+
 func (p *Pair) CombinedBaseVolume() float32 {
 	var sum float32 = 0
 	for _, emd := range p.ExchangeMarketDataByExchangeId {

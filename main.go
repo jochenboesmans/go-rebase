@@ -1,20 +1,17 @@
 package main
 
 import (
-	"fmt"
+	"github.com/jochenboesmans/go-rebase/rebasing"
 
-	m "github.com/jochenboesmans/go-rebase/model/market"
 	"github.com/aws/aws-lambda-go/lambda"
+	m "github.com/jochenboesmans/go-rebase/model/market"
 )
 
-func handleRequest() (string, error) {
-	pair := m.Pair{
-		BaseId: "BLA",
-		QuoteId: "BLE",
-	}
-	return fmt.Sprintf("pair id: %s", pair.Id()), nil
+func rebase(rebaseId string, pathDepth uint8, market m.Market) (m.Market, error) {
+	rebasing.RebaseMarket(rebaseId, pathDepth, &market)
+	return market, nil
 }
 
 func main() {
-	lambda.Start(handleRequest)
+	lambda.Start(rebase)
 }
