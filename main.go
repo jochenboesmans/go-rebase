@@ -7,9 +7,15 @@ import (
 	m "github.com/jochenboesmans/go-rebase/model/market"
 )
 
-func rebase(rebaseId string, pathDepth uint8, market m.Market) (m.Market, error) {
-	rebasing.RebaseMarket(rebaseId, pathDepth, &market)
-	return market, nil
+type inputType struct {
+	rebaseId  string
+	pathDepth uint8
+	market    m.Market
+}
+
+func rebase(i inputType) (m.Market, error) {
+	rebasing.RebaseMarket(i.rebaseId, i.pathDepth, &i.market)
+	return i.market, nil
 }
 
 func main() {
