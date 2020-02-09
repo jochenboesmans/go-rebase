@@ -22,7 +22,8 @@ type rebasePathsType struct {
 func RebaseMarket(rebaseId string, pathDepth uint8, market *m.Market) {
 	var waitGroup sync.WaitGroup
 	for pairId := range market.PairsById {
-		go rebasePair(pairId, rebaseId, pathDepth, market, &waitGroup)
+		waitGroup.Add(1)
+		rebasePair(pairId, rebaseId, pathDepth, market, &waitGroup)
 	}
 	waitGroup.Wait()
 }
@@ -33,8 +34,12 @@ func rebasePair(pairId string, rebaseId string, pathDepth uint8, market *m.Marke
 		Base:  rebasePaths(BASE, initialPath, rebaseId, pathDepth, market),
 		Quote: rebasePaths(QUOTE, initialPath, rebaseId, pathDepth, market),
 	}
+	fmt.Printf("pairId: %s\n", pairId)
+	fmt.Printf("rebasePaths: %+v\n", rebasePaths)
 
 	pair := market.PairsById[pairId]
+
+	fmt.Printf("pairBefore: %+v\n", pair)
 
 	for exchangeId, emd := range pair.ExchangeMarketDataByExchangeId {
 		if rebasedCurrentAsk, err := deeplyRebaseRate(emd.CurrentAsk, rebaseId, rebasePaths, market); err == nil {
@@ -52,16 +57,23 @@ func rebasePair(pairId string, rebaseId string, pathDepth uint8, market *m.Marke
 		pair.ExchangeMarketDataByExchangeId[exchangeId] = emd
 	}
 
+	fmt.Printf("pairAfter: %+v\n", pair)
+
 	market.PairsById[pairId] = pair
 	waitGroup.Done()
 }
 
 func rebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId string, pathDepth uint8, market *m.Market) [][]string {
-	if len(pathAccumulator) >= int(pathDepth) {
+	fmt.Printf("REBASE: direction: %d\n", direction)
+	fmt.Printf("rebaseId: %s\n", rebaseId)
+	fmt.Printf("pathAccumulator: %+v\n", pathAccumulator)
+
+	if len(pathAccumulator) > int(pathDepth) {
 		return [][]string{}
 	} else {
 		lastPairId := pathAccumulator[0]
 		lastBaseId := market.PairsById[lastPairId].BaseId
+		fmt.Printf("lastBaseId: %s\n", lastBaseId)
 		if lastBaseId == rebaseId {
 			return [][]string{pathAccumulator}
 		} else {
@@ -77,10 +89,12 @@ func doRebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId
 	} else if direction == QUOTE {
 		nextNeighborIds = market.PairsById[pathAccumulator[0]].QuoteNeighborIds(market)
 	}
+	fmt.Printf("nextNeighborIds: %+v\n", nextNeighborIds)
 
 	var result [][]string
 	for _, nextNeighborId := range nextNeighborIds {
-		nextPath := append([]string{nextNeighborId})
+		nextPath := append([]string{nextNeighborId}, pathAccumulator...)
+		fmt.Printf("nextPath: %+v\n", nextPath)
 		result = append(result, rebasePaths(direction, nextPath, rebaseId, pathDepth, market)...)
 	}
 	return result

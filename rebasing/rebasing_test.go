@@ -92,3 +92,77 @@ func TestShallowlyRebaseRate(t *testing.T) {
 		So(actual, ShouldResemble, expected)
 	})
 }
+
+func TestRebaseMarket(t *testing.T) {
+	Convey("returns expected values for simple market", t, func() {
+		mockPairA := m.Pair{
+			BaseId:  "1",
+			QuoteId: "2",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  3,
+					CurrentBid: 3,
+					CurrentAsk: 3,
+					BaseVolume: 1,
+				},
+			},
+		}
+		mockPairB := m.Pair{
+			BaseId:  "2",
+			QuoteId: "3",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  2,
+					CurrentBid: 2,
+					CurrentAsk: 2,
+					BaseVolume: 1,
+				},
+			},
+		}
+		mockMarket := m.Market{
+			PairsById: map[string]m.Pair{
+				mockPairA.Id(): mockPairA,
+				mockPairB.Id(): mockPairB,
+			},
+		}
+
+		RebaseMarket("1", 2, &mockMarket)
+
+		// expect pair a's rates not to have changed since it's based in "1" already
+		expectedPairA := m.Pair{
+			BaseId:  "1",
+			QuoteId: "2",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  3,
+					CurrentBid: 3,
+					CurrentAsk: 3,
+					BaseVolume: 1,
+				},
+			},
+		}
+
+		// expect pair b's rates to be the product of its own rates and pair a's rates since it's possible to rebase via id "2"
+		expectedPairB := m.Pair{
+			BaseId:  "2",
+			QuoteId: "3",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  6,
+					CurrentBid: 6,
+					CurrentAsk: 6,
+					BaseVolume: 3,
+				},
+			},
+		}
+
+		expectedMarket := m.Market{
+			PairsById: map[string]m.Pair{
+				expectedPairA.Id(): expectedPairA,
+				expectedPairB.Id(): expectedPairB,
+			},
+		}
+
+		So(mockMarket, ShouldResemble, expectedMarket)
+	})
+}
