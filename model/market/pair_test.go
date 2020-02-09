@@ -21,6 +21,86 @@ var mockPair = Pair{
 	},
 }
 
+func TestPair_BaseNeighborIds(t *testing.T) {
+	mockPairA := Pair{
+		BaseId: "1",
+	}
+	Convey("a pair B with a matching quote id to a pair A's base id should be a base neighbor of pair A", t, func() {
+		mockPairBMatching := Pair{
+			QuoteId: "1",
+		}
+		mockMarket := Market{
+			PairsById: map[string]Pair{
+				mockPairA.Id(): mockPairA,
+				mockPairBMatching.Id(): mockPairBMatching,
+			},
+		}
+
+		expected := []string{mockPairBMatching.Id()}
+
+		actual := mockPairA.BaseNeighborIds(&mockMarket)
+
+		So(actual, ShouldResemble, expected)
+	})
+	Convey("a pair B with a non-matching quote id to a pair A's base id should not be a base neighbor of pair A", t, func() {
+		mockPairBNonMatching := Pair{
+			QuoteId: "2",
+		}
+		mockMarket := Market{
+			PairsById: map[string]Pair{
+				mockPairA.Id(): mockPairA,
+				mockPairBNonMatching.Id(): mockPairBNonMatching,
+			},
+		}
+
+		var expected []string
+
+		actual := mockPairA.BaseNeighborIds(&mockMarket)
+
+		So(actual, ShouldResemble, expected)
+	})
+}
+
+func TestPair_QuoteNeighborIds(t *testing.T) {
+	mockPairA := Pair{
+		QuoteId: "1",
+	}
+	Convey("a pair B with a matching base id to a pair A's quote id should be a quote neighbor of pair A", t, func() {
+		mockPairBMatching := Pair{
+			BaseId: "1",
+		}
+		mockMarket := Market{
+			PairsById: map[string]Pair{
+				mockPairA.Id(): mockPairA,
+				mockPairBMatching.Id(): mockPairBMatching,
+			},
+		}
+
+		expected := []string{mockPairBMatching.Id()}
+
+		actual := mockPairA.BaseNeighborIds(&mockMarket)
+
+		So(actual, ShouldResemble, expected)
+	})
+	Convey("a pair B with a non-matching base id to a pair A's quote id should not be a quote neighbor of pair A", t, func() {
+		mockPairBNonMatching := Pair{
+			BaseId: "2",
+		}
+		mockMarket := Market{
+			PairsById: map[string]Pair{
+				mockPairA.Id(): mockPairA,
+				mockPairBNonMatching.Id(): mockPairBNonMatching,
+			},
+		}
+
+		var expected []string
+
+		actual := mockPairA.QuoteNeighborIds(&mockMarket)
+
+		So(actual, ShouldResemble, expected)
+	})
+}
+
 func TestCombinedBaseVolume(t *testing.T) {
 	Convey("works as expected for basic mock pair", t, func() {
 		expected := mockPair.ExchangeMarketDataByExchangeId["KYBER"].BaseVolume +

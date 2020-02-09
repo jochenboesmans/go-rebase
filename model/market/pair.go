@@ -39,9 +39,9 @@ func (p *Pair) Id() string {
 
 func (p Pair) BaseNeighborIds(market *Market) []string {
 	var neighborIdsAcc []string
-	for pairId, pair := range market.PairsById {
+	for _, pair := range market.PairsById {
 		if p.BaseId == pair.QuoteId {
-			neighborIdsAcc = append(neighborIdsAcc, pairId)
+			neighborIdsAcc = append(neighborIdsAcc, pair.Id())
 		}
 	}
 	return neighborIdsAcc
@@ -49,9 +49,9 @@ func (p Pair) BaseNeighborIds(market *Market) []string {
 
 func (p Pair) QuoteNeighborIds(market *Market) []string {
 	var neighborIdsAcc []string
-	for pairId, pair := range market.PairsById {
+	for _, pair := range market.PairsById {
 		if p.QuoteId == pair.BaseId {
-			neighborIdsAcc = append(neighborIdsAcc, pairId)
+			neighborIdsAcc = append(neighborIdsAcc, pair.Id())
 		}
 	}
 	return neighborIdsAcc
