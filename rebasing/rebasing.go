@@ -23,7 +23,7 @@ func RebaseMarket(rebaseId string, pathDepth uint8, market *m.Market) {
 	var waitGroup sync.WaitGroup
 	for pairId := range market.PairsById {
 		waitGroup.Add(1)
-		rebasePair(pairId, rebaseId, pathDepth, market, &waitGroup)
+		go rebasePair(pairId, rebaseId, pathDepth, market, &waitGroup)
 	}
 	waitGroup.Wait()
 }
