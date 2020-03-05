@@ -50,6 +50,63 @@ func TestRebasePaths(t *testing.T) {
 		So(rebasePaths.Base, ShouldResemble, expectedBase)
 		So(rebasePaths.Quote, ShouldResemble, expectedQuote)
 	})
+	Convey("rebase path in both the quote and the base direction", t, func() {
+		mockPairA := m.Pair{
+			BaseId:  "1",
+			QuoteId: "2",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  1,
+					CurrentBid: 1,
+					CurrentAsk: 1,
+					BaseVolume: 1,
+				},
+			},
+		}
+		mockPairB := m.Pair{
+			BaseId:  "2",
+			QuoteId: "3",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  1,
+					CurrentBid: 1,
+					CurrentAsk: 1,
+					BaseVolume: 1,
+				},
+			},
+		}
+		mockPairC := m.Pair{
+			BaseId:  "3",
+			QuoteId: "1",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  1,
+					CurrentBid: 1,
+					CurrentAsk: 1,
+					BaseVolume: 1,
+				},
+			},
+		}
+
+		mockMarket := m.Market{
+			PairsById: map[string]m.Pair{
+				mockPairA.Id(): mockPairA,
+				mockPairB.Id(): mockPairB,
+				mockPairC.Id(): mockPairC,
+			},
+		}
+
+		rebasePaths := rebasePathsType{
+			Base:  rebasePaths(BASE, []string{mockPairC.Id()}, "1", 3, &mockMarket),
+			Quote: rebasePaths(QUOTE, []string{mockPairC.Id()}, "1", 3, &mockMarket),
+		}
+
+		expectedBase := [][]string{{mockPairA.Id(), mockPairB.Id(), mockPairC.Id()}}
+		expectedQuote := [][]string{{mockPairA.Id(), mockPairC.Id()}}
+
+		So(rebasePaths.Base, ShouldResemble, expectedBase)
+		So(rebasePaths.Quote, ShouldResemble, expectedQuote)
+	})
 }
 
 func TestShallowlyRebaseRate(t *testing.T) {
