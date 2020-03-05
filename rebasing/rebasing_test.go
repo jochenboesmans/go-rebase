@@ -11,26 +11,10 @@ func TestRebasePaths(t *testing.T) {
 		mockPairA := m.Pair{
 			BaseId:  "1",
 			QuoteId: "2",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  3,
-					CurrentBid: 3,
-					CurrentAsk: 3,
-					BaseVolume: 1,
-				},
-			},
 		}
 		mockPairB := m.Pair{
 			BaseId:  "2",
 			QuoteId: "3",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  2,
-					CurrentBid: 2,
-					CurrentAsk: 2,
-					BaseVolume: 1,
-				},
-			},
 		}
 		mockMarket := m.Market{
 			PairsById: map[string]m.Pair{
@@ -54,38 +38,14 @@ func TestRebasePaths(t *testing.T) {
 		mockPairA := m.Pair{
 			BaseId:  "1",
 			QuoteId: "2",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  1,
-					CurrentBid: 1,
-					CurrentAsk: 1,
-					BaseVolume: 1,
-				},
-			},
 		}
 		mockPairB := m.Pair{
 			BaseId:  "2",
 			QuoteId: "3",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  1,
-					CurrentBid: 1,
-					CurrentAsk: 1,
-					BaseVolume: 1,
-				},
-			},
 		}
 		mockPairC := m.Pair{
 			BaseId:  "3",
 			QuoteId: "1",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  1,
-					CurrentBid: 1,
-					CurrentAsk: 1,
-					BaseVolume: 1,
-				},
-			},
 		}
 
 		mockMarket := m.Market{
@@ -111,59 +71,50 @@ func TestRebasePaths(t *testing.T) {
 
 func TestShallowlyRebaseRate(t *testing.T) {
 	Convey("rebase ids have matching pair in mockMarket", t, func() {
+		mockPairA := m.Pair{
+			BaseId:  "1",
+			QuoteId: "2",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  2,
+					CurrentBid: 2,
+					CurrentAsk: 2,
+					BaseVolume: 1,
+				},
+			},
+		}
+		mockPairB := m.Pair{
+			BaseId:  "2",
+			QuoteId: "3",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  3,
+					CurrentBid: 3,
+					CurrentAsk: 3,
+					BaseVolume: 1,
+				},
+			},
+		}
+
 		rate := float32(1.1)
-		rebaseId := "0xfoo"
-		baseId := "0xbar"
-		quoteId := "0xheh"
-		originalPair := m.Pair{
-			BaseId:  baseId,
-			QuoteId: quoteId,
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"KYBER": {
-					BaseVolume: 1.5,
-					CurrentBid: 100.7,
-					CurrentAsk: 103.5,
-				},
-				"UNISWAP": {
-					BaseVolume: 3,
-					CurrentBid: 150.1,
-					CurrentAsk: 155.2,
-				},
-			},
-		}
-		rebasePair := m.Pair{
-			BaseId:  rebaseId,
-			QuoteId: baseId,
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"KYBER": {
-					BaseVolume: 1.5,
-					CurrentBid: 100.7,
-					CurrentAsk: 103.5,
-				},
-				"UNISWAP": {
-					BaseVolume: 3,
-					CurrentBid: 150.1,
-					CurrentAsk: 155.2,
-				},
-			},
-		}
+
 		mockMarket := m.Market{
 			PairsById: map[string]m.Pair{
-				rebasePair.Id():   rebasePair,
-				originalPair.Id(): originalPair,
+				mockPairA.Id(): mockPairA,
+				mockPairB.Id(): mockPairB,
 			},
 		}
-		rebasePairBaseVolumeWeightedSpreadAverage, err1 := rebasePair.BaseVolumeWeightedSpreadAverage()
+		rebasePairBaseVolumeWeightedSpreadAverage, err1 := mockPairA.BaseVolumeWeightedSpreadAverage()
 		// only test in case BaseVolumeWeightedSpreadAverage returns valid response
 		if err1 == nil {
 			expected := rate * rebasePairBaseVolumeWeightedSpreadAverage
-			actual, err := shallowlyRebaseRate(rate, rebaseId, baseId, &mockMarket)
+			actual, err := shallowlyRebaseRate(rate, "1", mockPairB.BaseId, &mockMarket)
 
 			So(err, ShouldBeNil)
 			So(actual, ShouldResemble, expected)
 		} else {
 			expected := 0
-			actual, err := shallowlyRebaseRate(rate, rebaseId, baseId, &mockMarket)
+			actual, err := shallowlyRebaseRate(rate, "1", mockPairB.BaseId, &mockMarket)
 
 			So(err, ShouldNotBeNil)
 			So(actual, ShouldResemble, expected)
