@@ -2,8 +2,6 @@ package rebasing
 
 import (
 	"fmt"
-	"sync"
-
 	m "github.com/jochenboesmans/go-rebase/model/market"
 )
 
@@ -19,43 +17,50 @@ type rebasePathsType struct {
 	Quote [][]string
 }
 
-func RebaseMarket(rebaseId string, maxPathDepth uint8, market *m.Market) {
-	var waitGroup sync.WaitGroup
+func RebaseMarket(rebaseId string, maxPathDepth uint8, market *m.Market) *m.Market {
+	rebasedMarket := m.Market{PairsById: map[string]m.Pair{}}
 	for pairId := range market.PairsById {
-		waitGroup.Add(1)
-		go rebasePair(pairId, rebaseId, maxPathDepth, market, &waitGroup)
+		rebasedMarket.PairsById[pairId] = *rebasePair(pairId, rebaseId, maxPathDepth, market)
 	}
-	waitGroup.Wait()
+	return &rebasedMarket
 }
 
-func rebasePair(pairId string, rebaseId string, maxPathDepth uint8, market *m.Market, waitGroup *sync.WaitGroup) {
+func rebasePair(pairId string, rebaseId string, maxPathDepth uint8, market *m.Market) *m.Pair {
 	// determine all paths from the current pair to pairs based in rebaseId
 	rebasePaths := rebasePathsType{
 		Base:  rebasePaths(BASE, []string{pairId}, rebaseId, maxPathDepth, market),
 		Quote: rebasePaths(QUOTE, []string{pairId}, rebaseId, maxPathDepth, market),
 	}
 
-	pair := market.PairsById[pairId]
+	originalPair := market.PairsById[pairId]
 
-	// deeply rebase all rates based on the available rebasePaths
-	for exchangeId, emd := range pair.ExchangeMarketDataByExchangeId {
-		if rebasedCurrentAsk, err := deeplyRebaseRate(emd.CurrentAsk, rebaseId, rebasePaths, market); err == nil {
-			emd.CurrentAsk = rebasedCurrentAsk
-		}
-		if rebasedCurrentBid, err := deeplyRebaseRate(emd.CurrentBid, rebaseId, rebasePaths, market); err == nil {
-			emd.CurrentBid = rebasedCurrentBid
-		}
-		if rebasedLastPrice, err := deeplyRebaseRate(emd.LastPrice, rebaseId, rebasePaths, market); err == nil {
-			emd.LastPrice = rebasedLastPrice
-		}
-		if rebasedBaseVolume, err := deeplyRebaseRate(emd.BaseVolume, rebaseId, rebasePaths, market); err == nil {
-			emd.BaseVolume = rebasedBaseVolume
-		}
-		pair.ExchangeMarketDataByExchangeId[exchangeId] = emd
+	rebasedPair := m.Pair{
+		BaseSymbol:                     originalPair.BaseSymbol,
+		QuoteSymbol:                    originalPair.QuoteSymbol,
+		BaseId:                         originalPair.BaseId,
+		QuoteId:                        originalPair.QuoteId,
+		ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{},
 	}
 
-	market.PairsById[pairId] = pair
-	waitGroup.Done()
+	// deeply rebase all rates based on the available rebasePaths
+	for exchangeId, emd := range originalPair.ExchangeMarketDataByExchangeId {
+		rebasedEmd := m.ExchangeMarketData{}
+		if rebasedCurrentAsk, err := deeplyRebaseRate(emd.CurrentAsk, rebaseId, rebasePaths, market); err == nil {
+			rebasedEmd.CurrentAsk = rebasedCurrentAsk
+		}
+		if rebasedCurrentBid, err := deeplyRebaseRate(emd.CurrentBid, rebaseId, rebasePaths, market); err == nil {
+			rebasedEmd.CurrentBid = rebasedCurrentBid
+		}
+		if rebasedLastPrice, err := deeplyRebaseRate(emd.LastPrice, rebaseId, rebasePaths, market); err == nil {
+			rebasedEmd.LastPrice = rebasedLastPrice
+		}
+		if rebasedBaseVolume, err := deeplyRebaseRate(emd.BaseVolume, rebaseId, rebasePaths, market); err == nil {
+			rebasedEmd.BaseVolume = rebasedBaseVolume
+		}
+		rebasedPair.ExchangeMarketDataByExchangeId[exchangeId] = rebasedEmd
+	}
+
+	return &rebasedPair
 }
 
 func rebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId string, maxPathDepth uint8, market *m.Market) [][]string {

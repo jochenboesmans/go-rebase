@@ -14,8 +14,8 @@ type inputType struct {
 }
 
 func rebase(i inputType) (m.Market, error) {
-	rebasing.RebaseMarket(i.RebaseId, i.PathDepth, &i.Market)
-	return i.Market, nil
+	rebasedMarket := *rebasing.RebaseMarket(i.RebaseId, i.PathDepth, &i.Market)
+	return rebasedMarket, nil
 }
 
 func main() {

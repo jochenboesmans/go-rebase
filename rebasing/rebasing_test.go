@@ -180,7 +180,7 @@ func TestRebaseMarket(t *testing.T) {
 			},
 		}
 
-		RebaseMarket("1", 2, &mockMarket)
+		actualMarket := RebaseMarket("1", 2, &mockMarket)
 
 		// expect pair a's rates not to have changed since it's based in "1" already
 		expectedPairA := m.Pair{
@@ -217,7 +217,7 @@ func TestRebaseMarket(t *testing.T) {
 			},
 		}
 
-		So(mockMarket, ShouldResemble, expectedMarket)
+		So(actualMarket, ShouldResemble, &expectedMarket)
 	})
 	Convey("more complex mockMarket with longer path to rebase pair", t, func() {
 		mockPairA := m.Pair{
@@ -264,7 +264,7 @@ func TestRebaseMarket(t *testing.T) {
 			},
 		}
 
-		RebaseMarket("1", 3, &mockMarket)
+		actualMarket := RebaseMarket("1", 3, &mockMarket)
 
 		// expect pair a's rates not to have changed since it's based in "1" already
 		expectedPairA := m.Pair{
@@ -315,7 +315,7 @@ func TestRebaseMarket(t *testing.T) {
 			},
 		}
 
-		So(mockMarket, ShouldResemble, expectedMarket)
+		So(actualMarket, ShouldResemble, &expectedMarket)
 	})
 	Convey("doesn't change rates when there is no path to rebase id", t, func() {
 		mockPairA := m.Pair{
@@ -349,7 +349,7 @@ func TestRebaseMarket(t *testing.T) {
 			},
 		}
 
-		RebaseMarket("1", 2, &mockMarket)
+		actualMarket := RebaseMarket("1", 2, &mockMarket)
 
 		// expect pair a's rates not to have changed since it's based in "1" already
 		expectedPairA := m.Pair{
@@ -365,16 +365,16 @@ func TestRebaseMarket(t *testing.T) {
 			},
 		}
 
-		// expect pair b's rates not to have changed since there's not path to the rebase id
+		// expect pair b's rates to be 0 because they can't be rebased
 		expectedPairB := m.Pair{
 			BaseId:  "3",
 			QuoteId: "4",
 			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
 				"ex1": {
-					LastPrice:  3,
-					CurrentBid: 3,
-					CurrentAsk: 3,
-					BaseVolume: 1,
+					LastPrice:  0,
+					CurrentBid: 0,
+					CurrentAsk: 0,
+					BaseVolume: 0,
 				},
 			},
 		}
@@ -386,6 +386,6 @@ func TestRebaseMarket(t *testing.T) {
 			},
 		}
 
-		So(mockMarket, ShouldResemble, expectedMarket)
+		So(actualMarket, ShouldResemble, &expectedMarket)
 	})
 }
