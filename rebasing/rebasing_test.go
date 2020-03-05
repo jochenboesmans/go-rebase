@@ -165,4 +165,173 @@ func TestRebaseMarket(t *testing.T) {
 
 		So(mockMarket, ShouldResemble, expectedMarket)
 	})
+	Convey("more complex market with longer path to rebase pair", t, func() {
+		mockPairA := m.Pair{
+			BaseId:  "1",
+			QuoteId: "2",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  2,
+					CurrentBid: 2,
+					CurrentAsk: 2,
+					BaseVolume: 1,
+				},
+			},
+		}
+		mockPairB := m.Pair{
+			BaseId:  "2",
+			QuoteId: "3",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  3,
+					CurrentBid: 3,
+					CurrentAsk: 3,
+					BaseVolume: 1,
+				},
+			},
+		}
+		mockPairC := m.Pair{
+			BaseId:  "3",
+			QuoteId: "4",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  4,
+					CurrentBid: 4,
+					CurrentAsk: 4,
+					BaseVolume: 1,
+				},
+			},
+		}
+		mockMarket := m.Market{
+			PairsById: map[string]m.Pair{
+				mockPairA.Id(): mockPairA,
+				mockPairB.Id(): mockPairB,
+				mockPairC.Id(): mockPairC,
+			},
+		}
+
+		RebaseMarket("1", 3, &mockMarket)
+
+		// expect pair a's rates not to have changed since it's based in "1" already
+		expectedPairA := m.Pair{
+			BaseId:  "1",
+			QuoteId: "2",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  2,
+					CurrentBid: 2,
+					CurrentAsk: 2,
+					BaseVolume: 1,
+				},
+			},
+		}
+
+		// expect pair b's rates to be the product of its own rates and pair a's rates since it's possible to rebase via id "2"
+		expectedPairB := m.Pair{
+			BaseId:  "2",
+			QuoteId: "3",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  6,
+					CurrentBid: 6,
+					CurrentAsk: 6,
+					BaseVolume: 2,
+				},
+			},
+		}
+		// expect pair c's rates to be the product of its own rates and pair b's rates since it's possible to rebase via id "3"
+		expectedPairC := m.Pair{
+			BaseId:  "3",
+			QuoteId: "4",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  24,
+					CurrentBid: 24,
+					CurrentAsk: 24,
+					BaseVolume: 6,
+				},
+			},
+		}
+
+		expectedMarket := m.Market{
+			PairsById: map[string]m.Pair{
+				expectedPairA.Id(): expectedPairA,
+				expectedPairB.Id(): expectedPairB,
+				expectedPairC.Id(): expectedPairC,
+			},
+		}
+
+		So(mockMarket, ShouldResemble, expectedMarket)
+	})
+	Convey("doesn't change rates when there is no path to rebase id", t, func() {
+		mockPairA := m.Pair{
+			BaseId:  "1",
+			QuoteId: "2",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  2,
+					CurrentBid: 2,
+					CurrentAsk: 2,
+					BaseVolume: 1,
+				},
+			},
+		}
+		mockPairB := m.Pair{
+			BaseId:  "3",
+			QuoteId: "4",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  3,
+					CurrentBid: 3,
+					CurrentAsk: 3,
+					BaseVolume: 1,
+				},
+			},
+		}
+		mockMarket := m.Market{
+			PairsById: map[string]m.Pair{
+				mockPairA.Id(): mockPairA,
+				mockPairB.Id(): mockPairB,
+			},
+		}
+
+		RebaseMarket("1", 2, &mockMarket)
+
+		// expect pair a's rates not to have changed since it's based in "1" already
+		expectedPairA := m.Pair{
+			BaseId:  "1",
+			QuoteId: "2",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  2,
+					CurrentBid: 2,
+					CurrentAsk: 2,
+					BaseVolume: 1,
+				},
+			},
+		}
+
+		// expect pair b's rates not to have changed since there's not path to the rebase id
+		expectedPairB := m.Pair{
+			BaseId:  "3",
+			QuoteId: "4",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  3,
+					CurrentBid: 3,
+					CurrentAsk: 3,
+					BaseVolume: 1,
+				},
+			},
+		}
+
+		expectedMarket := m.Market{
+			PairsById: map[string]m.Pair{
+				expectedPairA.Id(): expectedPairA,
+				expectedPairB.Id(): expectedPairB,
+			},
+		}
+
+		So(mockMarket, ShouldResemble, expectedMarket)
+	})
 }
