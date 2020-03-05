@@ -6,8 +6,54 @@ import (
 	"testing"
 )
 
+func TestRebasePaths(t *testing.T) {
+	Convey("rebase path in base direction but not in quote direction", t, func() {
+		mockPairA := m.Pair{
+			BaseId:  "1",
+			QuoteId: "2",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  3,
+					CurrentBid: 3,
+					CurrentAsk: 3,
+					BaseVolume: 1,
+				},
+			},
+		}
+		mockPairB := m.Pair{
+			BaseId:  "2",
+			QuoteId: "3",
+			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
+				"ex1": {
+					LastPrice:  2,
+					CurrentBid: 2,
+					CurrentAsk: 2,
+					BaseVolume: 1,
+				},
+			},
+		}
+		mockMarket := m.Market{
+			PairsById: map[string]m.Pair{
+				mockPairA.Id(): mockPairA,
+				mockPairB.Id(): mockPairB,
+			},
+		}
+
+		rebasePaths := rebasePathsType{
+			Base:  rebasePaths(BASE, []string{mockPairB.Id()}, "1", 2, &mockMarket),
+			Quote: rebasePaths(QUOTE, []string{mockPairB.Id()}, "1", 2, &mockMarket),
+		}
+
+		expectedBase := [][]string{{mockPairA.Id(), mockPairB.Id()}}
+		var expectedQuote [][]string
+
+		So(rebasePaths.Base, ShouldResemble, expectedBase)
+		So(rebasePaths.Quote, ShouldResemble, expectedQuote)
+	})
+}
+
 func TestShallowlyRebaseRate(t *testing.T) {
-	Convey("rebase ids have matching pair in market", t, func() {
+	Convey("rebase ids have matching pair in mockMarket", t, func() {
 		rate := float32(1.1)
 		rebaseId := "0xfoo"
 		baseId := "0xbar"
@@ -44,7 +90,7 @@ func TestShallowlyRebaseRate(t *testing.T) {
 				},
 			},
 		}
-		market := m.Market{
+		mockMarket := m.Market{
 			PairsById: map[string]m.Pair{
 				rebasePair.Id():   rebasePair,
 				originalPair.Id(): originalPair,
@@ -54,13 +100,13 @@ func TestShallowlyRebaseRate(t *testing.T) {
 		// only test in case BaseVolumeWeightedSpreadAverage returns valid response
 		if err1 == nil {
 			expected := rate * rebasePairBaseVolumeWeightedSpreadAverage
-			actual, err := shallowlyRebaseRate(rate, rebaseId, baseId, &market)
+			actual, err := shallowlyRebaseRate(rate, rebaseId, baseId, &mockMarket)
 
 			So(err, ShouldBeNil)
 			So(actual, ShouldResemble, expected)
 		} else {
 			expected := 0
-			actual, err := shallowlyRebaseRate(rate, rebaseId, baseId, &market)
+			actual, err := shallowlyRebaseRate(rate, rebaseId, baseId, &mockMarket)
 
 			So(err, ShouldNotBeNil)
 			So(actual, ShouldResemble, expected)
@@ -79,14 +125,14 @@ func TestShallowlyRebaseRate(t *testing.T) {
 			BaseId:  rebaseId,
 			QuoteId: baseId,
 		}
-		market := m.Market{
+		mockMarket := m.Market{
 			PairsById: map[string]m.Pair{
 				rebasePair.Id():   rebasePair,
 				originalPair.Id(): originalPair,
 			},
 		}
 		expected := rate
-		actual, err := shallowlyRebaseRate(rate, rebaseId, baseId, &market)
+		actual, err := shallowlyRebaseRate(rate, rebaseId, baseId, &mockMarket)
 
 		So(err, ShouldBeNil)
 		So(actual, ShouldResemble, expected)
@@ -94,7 +140,7 @@ func TestShallowlyRebaseRate(t *testing.T) {
 }
 
 func TestRebaseMarket(t *testing.T) {
-	Convey("returns expected values for simple market", t, func() {
+	Convey("returns expected values for simple mockMarket", t, func() {
 		mockPairA := m.Pair{
 			BaseId:  "1",
 			QuoteId: "2",
@@ -165,7 +211,7 @@ func TestRebaseMarket(t *testing.T) {
 
 		So(mockMarket, ShouldResemble, expectedMarket)
 	})
-	Convey("more complex market with longer path to rebase pair", t, func() {
+	Convey("more complex mockMarket with longer path to rebase pair", t, func() {
 		mockPairA := m.Pair{
 			BaseId:  "1",
 			QuoteId: "2",
