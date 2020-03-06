@@ -3,6 +3,7 @@ package rebasing
 import (
 	"fmt"
 	m "github.com/jochenboesmans/go-rebase/model/market"
+	"sync"
 )
 
 type rebaseDirection uint8
@@ -19,48 +20,43 @@ type rebasePathsType struct {
 
 func RebaseMarket(rebaseId string, maxPathDepth uint8, market *m.Market) *m.Market {
 	rebasedMarket := m.Market{PairsById: map[string]m.Pair{}}
+	var waitGroup sync.WaitGroup
 	for pairId := range market.PairsById {
-		rebasedMarket.PairsById[pairId] = *rebasePair(pairId, rebaseId, maxPathDepth, market)
+		waitGroup.Add(1)
+		go rebasePair(pairId, rebaseId, maxPathDepth, market, &rebasedMarket, &waitGroup)
 	}
+	waitGroup.Wait()
 	return &rebasedMarket
 }
 
-func rebasePair(pairId string, rebaseId string, maxPathDepth uint8, market *m.Market) *m.Pair {
+func rebasePair(pairId string, rebaseId string, maxPathDepth uint8, market *m.Market, rebasedMarket *m.Market, waitGroup *sync.WaitGroup) {
 	// determine all paths from the current pair to pairs based in rebaseId
 	rebasePaths := rebasePathsType{
 		Base:  rebasePaths(BASE, []string{pairId}, rebaseId, maxPathDepth, market),
 		Quote: rebasePaths(QUOTE, []string{pairId}, rebaseId, maxPathDepth, market),
 	}
 
-	originalPair := market.PairsById[pairId]
+	originalMarketPair := market.PairsById[pairId]
 
-	rebasedPair := m.Pair{
-		BaseSymbol:                     originalPair.BaseSymbol,
-		QuoteSymbol:                    originalPair.QuoteSymbol,
-		BaseId:                         originalPair.BaseId,
-		QuoteId:                        originalPair.QuoteId,
+	rebasedMarket.PairsById[pairId] = m.Pair{
+		BaseSymbol:                     originalMarketPair.BaseSymbol,
+		QuoteSymbol:                    originalMarketPair.QuoteSymbol,
+		BaseId:                         originalMarketPair.BaseId,
+		QuoteId:                        originalMarketPair.QuoteId,
 		ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{},
 	}
 
 	// deeply rebase all rates based on the available rebasePaths
-	for exchangeId, emd := range originalPair.ExchangeMarketDataByExchangeId {
+	for exchangeId, emd := range originalMarketPair.ExchangeMarketDataByExchangeId {
 		rebasedEmd := m.ExchangeMarketData{}
-		if rebasedCurrentAsk, err := deeplyRebaseRate(emd.CurrentAsk, rebaseId, rebasePaths, market); err == nil {
-			rebasedEmd.CurrentAsk = rebasedCurrentAsk
-		}
-		if rebasedCurrentBid, err := deeplyRebaseRate(emd.CurrentBid, rebaseId, rebasePaths, market); err == nil {
-			rebasedEmd.CurrentBid = rebasedCurrentBid
-		}
-		if rebasedLastPrice, err := deeplyRebaseRate(emd.LastPrice, rebaseId, rebasePaths, market); err == nil {
-			rebasedEmd.LastPrice = rebasedLastPrice
-		}
-		if rebasedBaseVolume, err := deeplyRebaseRate(emd.BaseVolume, rebaseId, rebasePaths, market); err == nil {
-			rebasedEmd.BaseVolume = rebasedBaseVolume
-		}
-		rebasedPair.ExchangeMarketDataByExchangeId[exchangeId] = rebasedEmd
+		rebasedEmd.CurrentAsk = deeplyRebaseRate(emd.CurrentAsk, rebaseId, rebasePaths, market)
+		rebasedEmd.CurrentBid = deeplyRebaseRate(emd.CurrentBid, rebaseId, rebasePaths, market)
+		rebasedEmd.LastPrice = deeplyRebaseRate(emd.LastPrice, rebaseId, rebasePaths, market)
+		rebasedEmd.BaseVolume = deeplyRebaseRate(emd.BaseVolume, rebaseId, rebasePaths, market)
+		fmt.Printf("rebasedEmd: %+v\n", rebasedEmd)
+		rebasedMarket.PairsById[pairId].ExchangeMarketDataByExchangeId[exchangeId] = rebasedEmd
 	}
-
-	return &rebasedPair
+	waitGroup.Done()
 }
 
 func rebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId string, maxPathDepth uint8, market *m.Market) [][]string {
@@ -93,7 +89,7 @@ func doRebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId
 	return result
 }
 
-func deeplyRebaseRate(rate float32, rebaseId string, rebasePaths rebasePathsType, market *m.Market) (float32, error) {
+func deeplyRebaseRate(rate float32, rebaseId string, rebasePaths rebasePathsType, market *m.Market) float32 {
 	combinedVolume := float32(0)
 	volumeWeightedSum := float32(0)
 	for _, baseRebasePath := range rebasePaths.Base {
@@ -151,9 +147,9 @@ func deeplyRebaseRate(rate float32, rebaseId string, rebasePaths rebasePathsType
 	}
 
 	if combinedVolume == 0 {
-		return 0, fmt.Errorf("division by 0")
+		return 0.0
 	} else {
-		return volumeWeightedSum / combinedVolume, nil
+		return volumeWeightedSum / combinedVolume
 	}
 }
 
