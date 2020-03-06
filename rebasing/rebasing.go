@@ -53,7 +53,6 @@ func rebasePair(pairId string, rebaseId string, maxPathDepth uint8, market *m.Ma
 		rebasedEmd.CurrentBid = deeplyRebaseRate(emd.CurrentBid, rebaseId, rebasePaths, market)
 		rebasedEmd.LastPrice = deeplyRebaseRate(emd.LastPrice, rebaseId, rebasePaths, market)
 		rebasedEmd.BaseVolume = deeplyRebaseRate(emd.BaseVolume, rebaseId, rebasePaths, market)
-		fmt.Printf("rebasedEmd: %+v\n", rebasedEmd)
 		rebasedMarket.PairsById[pairId].ExchangeMarketDataByExchangeId[exchangeId] = rebasedEmd
 	}
 	waitGroup.Done()
