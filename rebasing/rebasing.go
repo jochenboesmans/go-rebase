@@ -19,21 +19,24 @@ type rebasePathsType struct {
 }
 
 func RebaseMarket(rebaseId string, maxPathDepth uint8, market *m.Market) *m.Market {
+	// shared data structures
 	rebasedMarket := m.Market{PairsById: map[string]m.Pair{}}
+	rebaseNeighbors := market.RebaseNeighbors()
+
 	var waitGroup sync.WaitGroup
 	for pairId := range market.PairsById {
 		waitGroup.Add(1)
-		go rebasePair(pairId, rebaseId, maxPathDepth, market, &rebasedMarket, &waitGroup)
+		go rebasePair(pairId, rebaseId, maxPathDepth, market, &rebasedMarket, rebaseNeighbors, &waitGroup)
 	}
 	waitGroup.Wait()
 	return &rebasedMarket
 }
 
-func rebasePair(pairId string, rebaseId string, maxPathDepth uint8, market *m.Market, rebasedMarket *m.Market, waitGroup *sync.WaitGroup) {
+func rebasePair(pairId string, rebaseId string, maxPathDepth uint8, market *m.Market, rebasedMarket *m.Market, rebaseNeighbors map[string]m.Neighbors, waitGroup *sync.WaitGroup) {
 	// determine all paths from the current pair to pairs based in rebaseId
 	rebasePaths := rebasePathsType{
-		Base:  rebasePaths(BASE, []string{pairId}, rebaseId, maxPathDepth, market),
-		Quote: rebasePaths(QUOTE, []string{pairId}, rebaseId, maxPathDepth, market),
+		Base:  rebasePaths(BASE, []string{pairId}, rebaseId, maxPathDepth, market, rebaseNeighbors),
+		Quote: rebasePaths(QUOTE, []string{pairId}, rebaseId, maxPathDepth, market, rebaseNeighbors),
 	}
 
 	originalMarketPair := market.PairsById[pairId]
@@ -58,7 +61,7 @@ func rebasePair(pairId string, rebaseId string, maxPathDepth uint8, market *m.Ma
 	waitGroup.Done()
 }
 
-func rebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId string, maxPathDepth uint8, market *m.Market) [][]string {
+func rebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId string, maxPathDepth uint8, market *m.Market, rebaseNeighbors map[string]m.Neighbors) [][]string {
 	if len(pathAccumulator) > int(maxPathDepth) {
 		return [][]string{}
 	} else {
@@ -67,23 +70,23 @@ func rebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId s
 		if lastBaseId == rebaseId {
 			return [][]string{pathAccumulator}
 		} else {
-			return doRebasePaths(direction, pathAccumulator, rebaseId, maxPathDepth, market)
+			return doRebasePaths(direction, pathAccumulator, rebaseId, maxPathDepth, market, rebaseNeighbors)
 		}
 	}
 }
 
-func doRebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId string, maxPathDepth uint8, market *m.Market) [][]string {
+func doRebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId string, maxPathDepth uint8, market *m.Market, rebaseNeighbors map[string]m.Neighbors) [][]string {
 	var nextNeighborIds []string
 	if direction == BASE {
-		nextNeighborIds = market.PairsById[pathAccumulator[0]].BaseNeighborIds(market)
+		nextNeighborIds = rebaseNeighbors[pathAccumulator[0]].Base
 	} else if direction == QUOTE {
-		nextNeighborIds = market.PairsById[pathAccumulator[0]].QuoteNeighborIds(market)
+		nextNeighborIds = rebaseNeighbors[pathAccumulator[0]].Quote
 	}
 
 	var result [][]string
 	for _, nextNeighborId := range nextNeighborIds {
 		nextPath := append([]string{nextNeighborId}, pathAccumulator...)
-		result = append(result, rebasePaths(direction, nextPath, rebaseId, maxPathDepth, market)...)
+		result = append(result, rebasePaths(direction, nextPath, rebaseId, maxPathDepth, market, rebaseNeighbors)...)
 	}
 	return result
 }

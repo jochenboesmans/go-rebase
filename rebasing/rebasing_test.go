@@ -22,10 +22,11 @@ func TestRebasePaths(t *testing.T) {
 				mockPairB.Id(): mockPairB,
 			},
 		}
+		mockRebaseNeighbors := mockMarket.RebaseNeighbors()
 
 		rebasePaths := rebasePathsType{
-			Base:  rebasePaths(BASE, []string{mockPairB.Id()}, "1", 2, &mockMarket),
-			Quote: rebasePaths(QUOTE, []string{mockPairB.Id()}, "1", 2, &mockMarket),
+			Base:  rebasePaths(BASE, []string{mockPairB.Id()}, "1", 2, &mockMarket, mockRebaseNeighbors),
+			Quote: rebasePaths(QUOTE, []string{mockPairB.Id()}, "1", 2, &mockMarket, mockRebaseNeighbors),
 		}
 
 		expectedBase := [][]string{{mockPairA.Id(), mockPairB.Id()}}
@@ -55,10 +56,11 @@ func TestRebasePaths(t *testing.T) {
 				mockPairC.Id(): mockPairC,
 			},
 		}
+		mockRebaseNeighbors := mockMarket.RebaseNeighbors()
 
 		rebasePaths := rebasePathsType{
-			Base:  rebasePaths(BASE, []string{mockPairC.Id()}, "1", 3, &mockMarket),
-			Quote: rebasePaths(QUOTE, []string{mockPairC.Id()}, "1", 3, &mockMarket),
+			Base:  rebasePaths(BASE, []string{mockPairC.Id()}, "1", 3, &mockMarket, mockRebaseNeighbors),
+			Quote: rebasePaths(QUOTE, []string{mockPairC.Id()}, "1", 3, &mockMarket, mockRebaseNeighbors),
 		}
 
 		expectedBase := [][]string{{mockPairA.Id(), mockPairB.Id(), mockPairC.Id()}}
@@ -97,10 +99,11 @@ func TestRebasePaths(t *testing.T) {
 				mockPairE.Id(): mockPairE,
 			},
 		}
+		mockRebaseNeighbors := mockMarket.RebaseNeighbors()
 
 		rebasePaths := rebasePathsType{
-			Base:  rebasePaths(BASE, []string{mockPairE.Id()}, "1", 5, &mockMarket),
-			Quote: rebasePaths(QUOTE, []string{mockPairE.Id()}, "1", 5, &mockMarket),
+			Base:  rebasePaths(BASE, []string{mockPairE.Id()}, "1", 5, &mockMarket, mockRebaseNeighbors),
+			Quote: rebasePaths(QUOTE, []string{mockPairE.Id()}, "1", 5, &mockMarket, mockRebaseNeighbors),
 		}
 
 		expectedBasePath1 := []string{mockPairA.Id(), mockPairC.Id(), mockPairE.Id()}
