@@ -41,6 +41,7 @@ func rebasePair(pairId string, rebaseId string, maxPathDepth uint8, market *m.Ma
 
 	originalMarketPair := market.PairsById[pairId]
 
+	// copy pair data to rebased pair
 	rebasedMarket.PairsById[pairId] = m.Pair{
 		BaseSymbol:                     originalMarketPair.BaseSymbol,
 		QuoteSymbol:                    originalMarketPair.QuoteSymbol,
@@ -51,12 +52,12 @@ func rebasePair(pairId string, rebaseId string, maxPathDepth uint8, market *m.Ma
 
 	// deeply rebase all rates based on the available rebasePaths
 	for exchangeId, emd := range originalMarketPair.ExchangeMarketDataByExchangeId {
-		rebasedEmd := m.ExchangeMarketData{}
-		rebasedEmd.CurrentAsk = deeplyRebaseRate(emd.CurrentAsk, rebaseId, rebasePaths, market)
-		rebasedEmd.CurrentBid = deeplyRebaseRate(emd.CurrentBid, rebaseId, rebasePaths, market)
-		rebasedEmd.LastPrice = deeplyRebaseRate(emd.LastPrice, rebaseId, rebasePaths, market)
-		rebasedEmd.BaseVolume = deeplyRebaseRate(emd.BaseVolume, rebaseId, rebasePaths, market)
-		rebasedMarket.PairsById[pairId].ExchangeMarketDataByExchangeId[exchangeId] = rebasedEmd
+		rebasedMarket.PairsById[pairId].ExchangeMarketDataByExchangeId[exchangeId] = m.ExchangeMarketData{
+			CurrentBid: deeplyRebaseRate(emd.CurrentBid, rebaseId, rebasePaths, market),
+			CurrentAsk: deeplyRebaseRate(emd.CurrentAsk, rebaseId, rebasePaths, market),
+			LastPrice:  deeplyRebaseRate(emd.LastPrice, rebaseId, rebasePaths, market),
+			BaseVolume: deeplyRebaseRate(emd.BaseVolume, rebaseId, rebasePaths, market),
+		}
 	}
 	waitGroup.Done()
 }
