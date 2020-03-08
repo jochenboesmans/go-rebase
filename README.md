@@ -2,6 +2,8 @@
 
 # Example usage
 
+Here's an example of a simple fx market being rebased in USD.
+
 ## Input
 
 ```json
