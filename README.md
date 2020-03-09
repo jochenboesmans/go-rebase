@@ -57,13 +57,13 @@ Here's an example of a simple fx market being rebased in USD.
     {
       "baseId": "USD",
       "quoteId": "EUR",
-      "exchangeMarkets": {
-        "FX1": {
+      "exchangeMarkets": [
+        {
           "currentBid": 1.12,
           "currentAsk": 1.13,
           "baseVolume": 100
         }
-      }
+      ]
     },
     {
       "baseId": "EUR",
@@ -81,7 +81,7 @@ Here's an example of a simple fx market being rebased in USD.
       "quoteId": "JPY",
       "exchangeMarkets": [
         {
-          "currentBid": 0.0094854375,
+          "currentBid": 0.009485438,
           "currentAsk": 0.009615375,
           "baseVolume": 129.9375
         }
