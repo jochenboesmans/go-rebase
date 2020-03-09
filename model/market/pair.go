@@ -10,18 +10,15 @@ import (
 Market pair containing data from one or many exchanges.
 */
 type Pair struct {
-	BaseSymbol                     string                        `json:"baseSymbol"`
-	BaseId                         string                        `json:"baseId"`
-	QuoteSymbol                    string                        `json:"quoteSymbol"`
-	QuoteId                        string                        `json:"quoteId"`
-	ExchangeMarketDataByExchangeId map[string]ExchangeMarketData `json:"exchangeMarketDataByExchangeId"`
+	BaseId          string           `json:"baseId"`
+	QuoteId         string           `json:"quoteId"`
+	ExchangeMarkets []ExchangeMarket `json:"exchangeMarkets"`
 }
 
 /**
 Exchange-specific market data.
 */
-type ExchangeMarketData struct {
-	LastPrice  float32 `json:"lastPrice"`
+type ExchangeMarket struct {
 	CurrentBid float32 `json:"currentBid"`
 	CurrentAsk float32 `json:"currentAsk"`
 	BaseVolume float32 `json:"baseVolume"`
@@ -39,7 +36,7 @@ func (p *Pair) Id() string {
 
 func (p *Pair) CombinedBaseVolume() float32 {
 	var sum float32 = 0
-	for _, emd := range p.ExchangeMarketDataByExchangeId {
+	for _, emd := range p.ExchangeMarkets {
 		sum += emd.BaseVolume
 	}
 	return sum
@@ -47,7 +44,7 @@ func (p *Pair) CombinedBaseVolume() float32 {
 
 func (p *Pair) BaseVolumeWeightedCurrentBidSum() float32 {
 	var sum float32 = 0
-	for _, emd := range p.ExchangeMarketDataByExchangeId {
+	for _, emd := range p.ExchangeMarkets {
 		sum += emd.BaseVolume * emd.CurrentBid
 	}
 	return sum
@@ -55,7 +52,7 @@ func (p *Pair) BaseVolumeWeightedCurrentBidSum() float32 {
 
 func (p *Pair) BaseVolumeWeightedCurrentAskSum() float32 {
 	var sum float32 = 0
-	for _, emd := range p.ExchangeMarketDataByExchangeId {
+	for _, emd := range p.ExchangeMarkets {
 		sum += emd.BaseVolume * emd.CurrentAsk
 	}
 	return sum

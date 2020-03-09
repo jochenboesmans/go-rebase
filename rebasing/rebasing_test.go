@@ -121,9 +121,8 @@ func TestShallowlyRebaseRate(t *testing.T) {
 		mockPairA := m.Pair{
 			BaseId:  "1",
 			QuoteId: "2",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  2,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 2,
 					CurrentAsk: 2,
 					BaseVolume: 1,
@@ -133,9 +132,8 @@ func TestShallowlyRebaseRate(t *testing.T) {
 		mockPairB := m.Pair{
 			BaseId:  "2",
 			QuoteId: "3",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  3,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 3,
 					CurrentAsk: 3,
 					BaseVolume: 1,
@@ -199,9 +197,8 @@ func TestRebaseMarket(t *testing.T) {
 		mockPairA := m.Pair{
 			BaseId:  "1",
 			QuoteId: "2",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  3,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 3,
 					CurrentAsk: 3,
 					BaseVolume: 1,
@@ -211,9 +208,8 @@ func TestRebaseMarket(t *testing.T) {
 		mockPairB := m.Pair{
 			BaseId:  "2",
 			QuoteId: "3",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  2,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 2,
 					CurrentAsk: 2,
 					BaseVolume: 1,
@@ -233,9 +229,8 @@ func TestRebaseMarket(t *testing.T) {
 		expectedPairA := m.Pair{
 			BaseId:  "1",
 			QuoteId: "2",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  3,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 3,
 					CurrentAsk: 3,
 					BaseVolume: 1,
@@ -247,9 +242,8 @@ func TestRebaseMarket(t *testing.T) {
 		expectedPairB := m.Pair{
 			BaseId:  "2",
 			QuoteId: "3",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  6,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 6,
 					CurrentAsk: 6,
 					BaseVolume: 3,
@@ -270,9 +264,8 @@ func TestRebaseMarket(t *testing.T) {
 		mockPairA := m.Pair{
 			BaseId:  "1",
 			QuoteId: "2",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  2,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 2,
 					CurrentAsk: 2,
 					BaseVolume: 1,
@@ -282,9 +275,8 @@ func TestRebaseMarket(t *testing.T) {
 		mockPairB := m.Pair{
 			BaseId:  "2",
 			QuoteId: "3",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  3,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 3,
 					CurrentAsk: 3,
 					BaseVolume: 1,
@@ -294,9 +286,8 @@ func TestRebaseMarket(t *testing.T) {
 		mockPairC := m.Pair{
 			BaseId:  "3",
 			QuoteId: "4",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  4,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 4,
 					CurrentAsk: 4,
 					BaseVolume: 1,
@@ -317,9 +308,8 @@ func TestRebaseMarket(t *testing.T) {
 		expectedPairA := m.Pair{
 			BaseId:  "1",
 			QuoteId: "2",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  2,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 2,
 					CurrentAsk: 2,
 					BaseVolume: 1,
@@ -331,9 +321,8 @@ func TestRebaseMarket(t *testing.T) {
 		expectedPairB := m.Pair{
 			BaseId:  "2",
 			QuoteId: "3",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  6,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 6,
 					CurrentAsk: 6,
 					BaseVolume: 2,
@@ -344,9 +333,8 @@ func TestRebaseMarket(t *testing.T) {
 		expectedPairC := m.Pair{
 			BaseId:  "3",
 			QuoteId: "4",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  24,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 24,
 					CurrentAsk: 24,
 					BaseVolume: 6,
@@ -368,9 +356,8 @@ func TestRebaseMarket(t *testing.T) {
 		mockPairA := m.Pair{
 			BaseId:  "1",
 			QuoteId: "2",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  2,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 2,
 					CurrentAsk: 2,
 					BaseVolume: 1,
@@ -380,9 +367,8 @@ func TestRebaseMarket(t *testing.T) {
 		mockPairB := m.Pair{
 			BaseId:  "3",
 			QuoteId: "4",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  3,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 3,
 					CurrentAsk: 3,
 					BaseVolume: 1,
@@ -402,9 +388,8 @@ func TestRebaseMarket(t *testing.T) {
 		expectedPairA := m.Pair{
 			BaseId:  "1",
 			QuoteId: "2",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  2,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 2,
 					CurrentAsk: 2,
 					BaseVolume: 1,
@@ -416,9 +401,8 @@ func TestRebaseMarket(t *testing.T) {
 		expectedPairB := m.Pair{
 			BaseId:  "3",
 			QuoteId: "4",
-			ExchangeMarketDataByExchangeId: map[string]m.ExchangeMarketData{
-				"ex1": {
-					LastPrice:  0,
+			ExchangeMarkets: []m.ExchangeMarket{
+				{
 					CurrentBid: 0,
 					CurrentAsk: 0,
 					BaseVolume: 0,
