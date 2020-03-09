@@ -18,9 +18,9 @@ Here's an example of a simple fx market being rebased in USD.
         {
           "currentBid": 1.12,
           "currentAsk": 1.13,
-          "baseVolume": 100,
-        },
-      ],
+          "baseVolume": 100
+        }
+      ]
     },
     {
       "baseId": "EUR",
@@ -29,9 +29,9 @@ Here's an example of a simple fx market being rebased in USD.
         {
           "currentBid": 1.15,
           "currentAsk": 1.16,
-          "baseVolume": 100,
-        },
-      ],
+          "baseVolume": 100
+        }
+      ]
     },
     {
       "baseId": "GBP",
@@ -40,11 +40,11 @@ Here's an example of a simple fx market being rebased in USD.
         {
           "currentBid": 0.0073,
           "currentAsk": 0.0074,
-          "baseVolume": 100,
-        },
-      ],
-    },
-  ],
+          "baseVolume": 100
+        }
+      ]
+    }
+  ]
 }
 ```
 
