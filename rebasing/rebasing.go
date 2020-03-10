@@ -41,8 +41,6 @@ func rebasePair(pairId string, rebaseId string, maxPathDepth uint8, market *m.Ma
 
 	originalMarketPair := market.PairsById[pairId]
 
-	// copy pair data to rebased pair
-
 	// deeply rebase all rates based on the available rebasePaths
 	var newExchangeMarkets []m.ExchangeMarket
 	for _, emd := range originalMarketPair.ExchangeMarkets {
@@ -54,9 +52,10 @@ func rebasePair(pairId string, rebaseId string, maxPathDepth uint8, market *m.Ma
 		newExchangeMarkets = append(newExchangeMarkets, newExchangeMarket)
 	}
 
+	// copy pair data to rebased pair
 	rebasedMarket.PairsById[pairId] = m.Pair{
-		BaseId:          originalMarketPair.BaseId,
-		QuoteId:         originalMarketPair.QuoteId,
+		BaseId:          market.PairsById[pairId].BaseId,
+		QuoteId:         market.PairsById[pairId].QuoteId,
 		ExchangeMarkets: newExchangeMarkets,
 	}
 
