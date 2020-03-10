@@ -168,11 +168,8 @@ func shallowlyRebaseRate(rate float32, rebaseId string, baseId string, market *m
 		if matchingMarketPair, ok := market.PairsById[rebasePair.Id()]; !ok {
 			return 0, fmt.Errorf(`no pair in market to rebase baseId "%s" to rebaseId "%s"`, baseId, rebaseId)
 		} else {
-			if matchingMarketPairBaseVolumeWeightedSpreadAverage, err := matchingMarketPair.BaseVolumeWeightedSpreadAverage(); err != nil {
-				return 0, err
-			} else {
-				return rate * matchingMarketPairBaseVolumeWeightedSpreadAverage, nil
-			}
+			matchingMarketPairBaseVolumeWeightedSpreadAverage := matchingMarketPair.BaseVolumeWeightedSpreadAverage()
+			return matchingMarketPairBaseVolumeWeightedSpreadAverage * rate, nil
 		}
 	}
 }

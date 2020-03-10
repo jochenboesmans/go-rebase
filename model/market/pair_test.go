@@ -26,9 +26,9 @@ func TestCombinedBaseVolume(t *testing.T) {
 		expected := mockPair.ExchangeMarkets[0].BaseVolume +
 			mockPair.ExchangeMarkets[1].BaseVolume
 
-		result := mockPair.CombinedBaseVolume()
+		actual := mockPair.CombinedBaseVolume()
 
-		So(result, ShouldEqual, expected)
+		So(actual, ShouldEqual, expected)
 	})
 }
 
@@ -39,9 +39,9 @@ func TestBaseVolumeWeightedCurrentBidSum(t *testing.T) {
 			mockPair.ExchangeMarkets[1].CurrentBid*
 				mockPair.ExchangeMarkets[1].BaseVolume
 
-		result := mockPair.BaseVolumeWeightedCurrentBidSum()
+		actual := mockPair.BaseVolumeWeightedCurrentBidSum()
 
-		So(result, ShouldEqual, expected)
+		So(actual, ShouldEqual, expected)
 	})
 }
 
@@ -52,9 +52,9 @@ func TestBaseVolumeWeightedCurrentAskSum(t *testing.T) {
 			mockPair.ExchangeMarkets[1].CurrentAsk*
 				mockPair.ExchangeMarkets[1].BaseVolume
 
-		result := mockPair.BaseVolumeWeightedCurrentAskSum()
+		actual := mockPair.BaseVolumeWeightedCurrentAskSum()
 
-		So(result, ShouldEqual, expected)
+		So(actual, ShouldEqual, expected)
 	})
 }
 
@@ -65,9 +65,21 @@ func TestBaseVolumeWeightedSpreadAverage(t *testing.T) {
 			2) /
 			mockPair.CombinedBaseVolume()
 
-		result, err := mockPair.BaseVolumeWeightedSpreadAverage()
+		actual := mockPair.BaseVolumeWeightedSpreadAverage()
 
-		So(err, ShouldBeNil)
-		So(result, ShouldEqual, expected)
+		So(actual, ShouldEqual, expected)
+	})
+	Convey("combined base volume of pair is zero", t, func() {
+		mockPair := Pair{
+			ExchangeMarkets: []ExchangeMarket{
+				{
+					BaseVolume: float32(0),
+				},
+			},
+		}
+		expected := float32(0)
+		actual := mockPair.BaseVolumeWeightedSpreadAverage()
+
+		So(actual, ShouldEqual, expected)
 	})
 }

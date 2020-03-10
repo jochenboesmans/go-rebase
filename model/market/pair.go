@@ -58,12 +58,12 @@ func (p *Pair) BaseVolumeWeightedCurrentAskSum() float32 {
 	return sum
 }
 
-func (p *Pair) BaseVolumeWeightedSpreadAverage() (float32, error) {
+func (p *Pair) BaseVolumeWeightedSpreadAverage() float32 {
 	spreadAverage := (p.BaseVolumeWeightedCurrentBidSum() + p.BaseVolumeWeightedCurrentAskSum()) / 2
 	if p.CombinedBaseVolume() == float32(0) {
-		return 0, fmt.Errorf(`combined base volume is 0 for pair: %+v\n`, p)
+		return float32(0)
 	} else {
 		weightedAverage := spreadAverage / p.CombinedBaseVolume()
-		return weightedAverage, nil
+		return weightedAverage
 	}
 }
