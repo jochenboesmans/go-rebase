@@ -8,14 +8,14 @@ import (
 )
 
 type inputType struct {
-	RebaseId      string   `json:"rebaseId"`
+	RebaseAssetId string   `json:"rebaseAssetId"`
 	MaxPathLength uint8    `json:"maxPathLength"`
 	Market        []m.Pair `json:"market"`
 }
 
 type outputType struct {
-	RebaseId string   `json:"rebaseId"`
-	Market   []m.Pair `json:"market"`
+	RebaseAssetId string   `json:"rebaseAssetId"`
+	Market        []m.Pair `json:"market"`
 }
 
 func (input inputType) extractMarket() m.Market {
@@ -28,10 +28,10 @@ func (input inputType) extractMarket() m.Market {
 	return market
 }
 
-func toOutputType(rebasedMarket m.Market, rebaseId string) outputType {
+func toOutputType(rebasedMarket m.Market, rebaseAssetId string) outputType {
 	output := outputType{
-		RebaseId: rebaseId,
-		Market:   []m.Pair{},
+		RebaseAssetId: rebaseAssetId,
+		Market:        []m.Pair{},
 	}
 	for _, pair := range rebasedMarket.PairsById {
 		output.Market = append(output.Market, pair)
@@ -41,8 +41,8 @@ func toOutputType(rebasedMarket m.Market, rebaseId string) outputType {
 
 func rebase(i inputType) (outputType, error) {
 	market := i.extractMarket()
-	rebasedMarket := *rebasing.RebaseMarket(i.RebaseId, i.MaxPathLength, &market)
-	output := toOutputType(rebasedMarket, i.RebaseId)
+	rebasedMarket := *rebasing.RebaseMarket(i.RebaseAssetId, i.MaxPathLength, &market)
+	output := toOutputType(rebasedMarket, i.RebaseAssetId)
 	return output, nil
 }
 
