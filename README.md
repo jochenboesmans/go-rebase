@@ -1,6 +1,6 @@
 [![jochenboesmans](https://circleci.com/gh/jochenboesmans/go-rebase.svg?style=svg)](https://app.circleci.com/pipelines/github/jochenboesmans/go-rebase)
 
-API is available at https://pormnyfnhf.execute-api.us-east-1.amazonaws.com/prod/go-rebase
+API is available at https://pormnyfnhf.execute-api.us-east-1.amazonaws.com/v1/
 
 # Example usage
 
