@@ -8,12 +8,12 @@ import (
 func TestMarket_RebaseNeighbors(t *testing.T) {
 	Convey("adjacent pairs see each other as neighbors", t, func() {
 		mockPairA := Pair{
-			BaseId:  "1",
-			QuoteId: "2",
+			BaseAssetId:  "1",
+			QuoteAssetId: "2",
 		}
 		mockPairB := Pair{
-			BaseId:  "2",
-			QuoteId: "3",
+			BaseAssetId:  "2",
+			QuoteAssetId: "3",
 		}
 		mockMarket := Market{
 			PairsById: map[string]Pair{
@@ -39,12 +39,12 @@ func TestMarket_RebaseNeighbors(t *testing.T) {
 	})
 	Convey("non-adjacent pairs don't see each other as neighbors", t, func() {
 		mockPairA := Pair{
-			BaseId:  "1",
-			QuoteId: "2",
+			BaseAssetId:  "1",
+			QuoteAssetId: "2",
 		}
 		mockPairB := Pair{
-			BaseId:  "3",
-			QuoteId: "4",
+			BaseAssetId:  "3",
+			QuoteAssetId: "4",
 		}
 		mockMarket := Market{
 			PairsById: map[string]Pair{

@@ -9,12 +9,12 @@ import (
 func TestRebasePaths(t *testing.T) {
 	Convey("path is already longer than specified max length", t, func() {
 		mockPairA := m.Pair{
-			BaseId:  "1",
-			QuoteId: "2",
+			BaseAssetId:  "1",
+			QuoteAssetId: "2",
 		}
 		mockPairB := m.Pair{
-			BaseId:  "2",
-			QuoteId: "3",
+			BaseAssetId:  "2",
+			QuoteAssetId: "3",
 		}
 		mockMarket := m.Market{
 			PairsById: map[string]m.Pair{
@@ -32,12 +32,12 @@ func TestRebasePaths(t *testing.T) {
 	})
 	Convey("rebase path in base direction but not in quote direction", t, func() {
 		mockPairA := m.Pair{
-			BaseId:  "1",
-			QuoteId: "2",
+			BaseAssetId:  "1",
+			QuoteAssetId: "2",
 		}
 		mockPairB := m.Pair{
-			BaseId:  "2",
-			QuoteId: "3",
+			BaseAssetId:  "2",
+			QuoteAssetId: "3",
 		}
 		mockMarket := m.Market{
 			PairsById: map[string]m.Pair{
@@ -60,16 +60,16 @@ func TestRebasePaths(t *testing.T) {
 	})
 	Convey("rebase path in both the quote and the base direction", t, func() {
 		mockPairA := m.Pair{
-			BaseId:  "1",
-			QuoteId: "2",
+			BaseAssetId:  "1",
+			QuoteAssetId: "2",
 		}
 		mockPairB := m.Pair{
-			BaseId:  "2",
-			QuoteId: "3",
+			BaseAssetId:  "2",
+			QuoteAssetId: "3",
 		}
 		mockPairC := m.Pair{
-			BaseId:  "3",
-			QuoteId: "1",
+			BaseAssetId:  "3",
+			QuoteAssetId: "1",
 		}
 
 		mockMarket := m.Market{
@@ -94,24 +94,24 @@ func TestRebasePaths(t *testing.T) {
 	})
 	Convey("multiple rebase paths in base direction", t, func() {
 		mockPairA := m.Pair{
-			BaseId:  "1",
-			QuoteId: "2",
+			BaseAssetId:  "1",
+			QuoteAssetId: "2",
 		}
 		mockPairB := m.Pair{
-			BaseId:  "1",
-			QuoteId: "3",
+			BaseAssetId:  "1",
+			QuoteAssetId: "3",
 		}
 		mockPairC := m.Pair{
-			BaseId:  "2",
-			QuoteId: "4",
+			BaseAssetId:  "2",
+			QuoteAssetId: "4",
 		}
 		mockPairD := m.Pair{
-			BaseId:  "3",
-			QuoteId: "4",
+			BaseAssetId:  "3",
+			QuoteAssetId: "4",
 		}
 		mockPairE := m.Pair{
-			BaseId:  "4",
-			QuoteId: "6",
+			BaseAssetId:  "4",
+			QuoteAssetId: "6",
 		}
 		mockMarket := m.Market{
 			PairsById: map[string]m.Pair{
@@ -156,8 +156,8 @@ func TestShallowlyRebaseRate(t *testing.T) {
 	})
 	Convey("rebase ids have matching pair in mockMarket", t, func() {
 		mockPairA := m.Pair{
-			BaseId:  "1",
-			QuoteId: "2",
+			BaseAssetId:  "1",
+			QuoteAssetId: "2",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 2,
@@ -167,8 +167,8 @@ func TestShallowlyRebaseRate(t *testing.T) {
 			},
 		}
 		mockPairB := m.Pair{
-			BaseId:  "2",
-			QuoteId: "3",
+			BaseAssetId:  "2",
+			QuoteAssetId: "3",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 3,
@@ -188,7 +188,7 @@ func TestShallowlyRebaseRate(t *testing.T) {
 		}
 		rebasePairBaseVolumeWeightedSpreadAverage := mockPairA.BaseVolumeWeightedSpreadAverage()
 		expected := rate * rebasePairBaseVolumeWeightedSpreadAverage
-		actual, err := shallowlyRebaseRate(rate, "1", mockPairB.BaseId, &mockMarket)
+		actual, err := shallowlyRebaseRate(rate, "1", mockPairB.BaseAssetId, &mockMarket)
 
 		So(err, ShouldBeNil)
 		So(actual, ShouldResemble, expected)
@@ -199,12 +199,12 @@ func TestShallowlyRebaseRate(t *testing.T) {
 		baseId := "0xfoo"
 		quoteId := "0xheh"
 		originalPair := m.Pair{
-			BaseId:  baseId,
-			QuoteId: quoteId,
+			BaseAssetId:  baseId,
+			QuoteAssetId: quoteId,
 		}
 		rebasePair := m.Pair{
-			BaseId:  rebaseId,
-			QuoteId: baseId,
+			BaseAssetId:  rebaseId,
+			QuoteAssetId: baseId,
 		}
 		mockMarket := m.Market{
 			PairsById: map[string]m.Pair{
@@ -223,8 +223,8 @@ func TestShallowlyRebaseRate(t *testing.T) {
 func TestRebaseMarket(t *testing.T) {
 	Convey("returns expected values for simple mockMarket", t, func() {
 		mockPairA := m.Pair{
-			BaseId:  "1",
-			QuoteId: "2",
+			BaseAssetId:  "1",
+			QuoteAssetId: "2",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 3,
@@ -234,8 +234,8 @@ func TestRebaseMarket(t *testing.T) {
 			},
 		}
 		mockPairB := m.Pair{
-			BaseId:  "2",
-			QuoteId: "3",
+			BaseAssetId:  "2",
+			QuoteAssetId: "3",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 2,
@@ -255,8 +255,8 @@ func TestRebaseMarket(t *testing.T) {
 
 		// expect pair a's rates not to have changed since it's based in "1" already
 		expectedPairA := m.Pair{
-			BaseId:  "1",
-			QuoteId: "2",
+			BaseAssetId:  "1",
+			QuoteAssetId: "2",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 3,
@@ -268,8 +268,8 @@ func TestRebaseMarket(t *testing.T) {
 
 		// expect pair b's rates to be the product of its own rates and pair a's rates since it's possible to rebase via id "2"
 		expectedPairB := m.Pair{
-			BaseId:  "2",
-			QuoteId: "3",
+			BaseAssetId:  "2",
+			QuoteAssetId: "3",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 6,
@@ -290,8 +290,8 @@ func TestRebaseMarket(t *testing.T) {
 	})
 	Convey("more complex mockMarket with longer path to rebase pair", t, func() {
 		mockPairA := m.Pair{
-			BaseId:  "1",
-			QuoteId: "2",
+			BaseAssetId:  "1",
+			QuoteAssetId: "2",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 2,
@@ -301,8 +301,8 @@ func TestRebaseMarket(t *testing.T) {
 			},
 		}
 		mockPairB := m.Pair{
-			BaseId:  "2",
-			QuoteId: "3",
+			BaseAssetId:  "2",
+			QuoteAssetId: "3",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 3,
@@ -312,8 +312,8 @@ func TestRebaseMarket(t *testing.T) {
 			},
 		}
 		mockPairC := m.Pair{
-			BaseId:  "3",
-			QuoteId: "4",
+			BaseAssetId:  "3",
+			QuoteAssetId: "4",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 4,
@@ -334,8 +334,8 @@ func TestRebaseMarket(t *testing.T) {
 
 		// expect pair a's rates not to have changed since it's based in "1" already
 		expectedPairA := m.Pair{
-			BaseId:  "1",
-			QuoteId: "2",
+			BaseAssetId:  "1",
+			QuoteAssetId: "2",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 2,
@@ -347,8 +347,8 @@ func TestRebaseMarket(t *testing.T) {
 
 		// expect pair b's rates to be the product of its own rates and pair a's rates since it's possible to rebase via id "2"
 		expectedPairB := m.Pair{
-			BaseId:  "2",
-			QuoteId: "3",
+			BaseAssetId:  "2",
+			QuoteAssetId: "3",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 6,
@@ -359,8 +359,8 @@ func TestRebaseMarket(t *testing.T) {
 		}
 		// expect pair c's rates to be the product of its own rates and pair b's rates since it's possible to rebase via id "3"
 		expectedPairC := m.Pair{
-			BaseId:  "3",
-			QuoteId: "4",
+			BaseAssetId:  "3",
+			QuoteAssetId: "4",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 24,
@@ -382,8 +382,8 @@ func TestRebaseMarket(t *testing.T) {
 	})
 	Convey("doesn't change rates when there is no path to rebase id", t, func() {
 		mockPairA := m.Pair{
-			BaseId:  "1",
-			QuoteId: "2",
+			BaseAssetId:  "1",
+			QuoteAssetId: "2",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 2,
@@ -393,8 +393,8 @@ func TestRebaseMarket(t *testing.T) {
 			},
 		}
 		mockPairB := m.Pair{
-			BaseId:  "3",
-			QuoteId: "4",
+			BaseAssetId:  "3",
+			QuoteAssetId: "4",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 3,
@@ -414,8 +414,8 @@ func TestRebaseMarket(t *testing.T) {
 
 		// expect pair a's rates not to have changed since it's based in "1" already
 		expectedPairA := m.Pair{
-			BaseId:  "1",
-			QuoteId: "2",
+			BaseAssetId:  "1",
+			QuoteAssetId: "2",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 2,
@@ -427,8 +427,8 @@ func TestRebaseMarket(t *testing.T) {
 
 		// expect pair b's rates to be 0 because they can't be rebased
 		expectedPairB := m.Pair{
-			BaseId:  "3",
-			QuoteId: "4",
+			BaseAssetId:  "3",
+			QuoteAssetId: "4",
 			ExchangeMarkets: []m.ExchangeMarket{
 				{
 					CurrentBid: 0,

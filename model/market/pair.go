@@ -10,8 +10,8 @@ import (
 Market pair containing data from one or many exchanges.
 */
 type Pair struct {
-	BaseId          string           `json:"baseId"`
-	QuoteId         string           `json:"quoteId"`
+	BaseAssetId     string           `json:"baseAssetId"`
+	QuoteAssetId    string           `json:"quoteAssetId"`
 	ExchangeMarkets []ExchangeMarket `json:"exchangeMarkets"`
 }
 
@@ -25,7 +25,7 @@ type ExchangeMarket struct {
 }
 
 func (p *Pair) Id() string {
-	idString := fmt.Sprintf("%s/%s", p.BaseId, p.QuoteId)
+	idString := fmt.Sprintf("%s/%s", p.BaseAssetId, p.QuoteAssetId)
 
 	hash := sha1.New()
 	hash.Write([]byte(idString))

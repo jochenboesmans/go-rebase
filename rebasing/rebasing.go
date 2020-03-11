@@ -54,8 +54,8 @@ func rebasePair(pairId string, rebaseId string, maxPathDepth uint8, market *m.Ma
 
 	// copy pair data to rebased pair
 	rebasedMarket.PairsById[pairId] = m.Pair{
-		BaseId:          market.PairsById[pairId].BaseId,
-		QuoteId:         market.PairsById[pairId].QuoteId,
+		BaseAssetId:     market.PairsById[pairId].BaseAssetId,
+		QuoteAssetId:    market.PairsById[pairId].QuoteAssetId,
 		ExchangeMarkets: newExchangeMarkets,
 	}
 
@@ -67,7 +67,7 @@ func rebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId s
 		return [][]string{}
 	} else {
 		lastPairId := pathAccumulator[0]
-		lastBaseId := market.PairsById[lastPairId].BaseId
+		lastBaseId := market.PairsById[lastPairId].BaseAssetId
 		if lastBaseId == rebaseId {
 			return [][]string{pathAccumulator}
 		} else {
@@ -95,13 +95,14 @@ func doRebasePaths(direction rebaseDirection, pathAccumulator []string, rebaseId
 func deeplyRebaseRate(rate float32, rebaseId string, rebasePaths rebasePathsType, market *m.Market) float32 {
 	combinedVolume := float32(0)
 	volumeWeightedSum := float32(0)
+
 	for _, baseRebasePath := range rebasePaths.Base {
 		rebasedRateAcc := rate
 		weightedSumAcc := float32(0)
 		for i := len(baseRebasePath) - 2; i >= 0; i-- {
 			pair := market.PairsById[baseRebasePath[i]]
-			baseId := pair.BaseId
-			quoteId := pair.QuoteId
+			baseId := pair.BaseAssetId
+			quoteId := pair.QuoteAssetId
 			if rebasedRate, err := shallowlyRebaseRate(rebasedRateAcc, baseId, quoteId, market); err == nil {
 				rebasedRateAcc = rebasedRate
 			}
@@ -120,8 +121,8 @@ func deeplyRebaseRate(rate float32, rebaseId string, rebasePaths rebasePathsType
 		weightedSumAcc := float32(0)
 		for i := len(quoteRebasePath) - 1; i >= 0; i-- {
 			pair := market.PairsById[quoteRebasePath[i]]
-			baseId := pair.BaseId
-			quoteId := pair.QuoteId
+			baseId := pair.BaseAssetId
+			quoteId := pair.QuoteAssetId
 			if i == 0 {
 				combinedVolume := pair.CombinedBaseVolume()
 				if rebasedCombinedVolume, err := shallowlyRebaseRate(combinedVolume, rebaseId, baseId, market); err == nil {
@@ -133,8 +134,8 @@ func deeplyRebaseRate(rate float32, rebaseId string, rebasePaths rebasePathsType
 				}
 			} else {
 				pair := market.PairsById[quoteRebasePath[i]]
-				baseId := pair.BaseId
-				quoteId := pair.QuoteId
+				baseId := pair.BaseAssetId
+				quoteId := pair.QuoteAssetId
 				if rebasedRate, err := shallowlyRebaseRate(rebasedRateAcc, quoteId, baseId, market); err == nil {
 					rebasedRateAcc = rebasedRate
 				}
@@ -161,8 +162,8 @@ func shallowlyRebaseRate(rate float32, rebaseId string, baseId string, market *m
 		return rate, nil
 	} else {
 		rebasePair := m.Pair{
-			BaseId:  rebaseId,
-			QuoteId: baseId,
+			BaseAssetId:  rebaseId,
+			QuoteAssetId: baseId,
 		}
 		if matchingMarketPair, ok := market.PairsById[rebasePair.Id()]; !ok {
 			return 0, fmt.Errorf(`no pair in market to rebase baseId "%s" to rebaseId "%s"`, baseId, rebaseId)

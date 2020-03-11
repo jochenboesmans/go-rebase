@@ -23,7 +23,7 @@ func (m *Market) RebaseNeighbors() map[string]Neighbors {
 	}
 	for pairAId, pairA := range m.PairsById {
 		for pairBId, pairB := range m.PairsById {
-			if pairA.BaseId == pairB.QuoteId {
+			if pairA.BaseAssetId == pairB.QuoteAssetId {
 				rebaseNeighbors[pairAId] = Neighbors{
 					Base:  append(rebaseNeighbors[pairAId].Base, pairBId),
 					Quote: rebaseNeighbors[pairAId].Quote,
